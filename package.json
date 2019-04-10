@@ -1,0 +1,21 @@
+{
+  "name": "dnm-react-smartcroppr",
+  "version": "1.0.0",
+  "description": "React cropper based on dnm-smartcroppr",
+  "main": "index.js",
+  "scripts": {
+    "git": "git add . && git commit -m",
+    "postgit": "git push -u"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/devdanim/dnm-react-smartcroppr.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/devdanim/dnm-react-smartcroppr/issues"
+  },
+  "homepage": "https://github.com/devdanim/dnm-react-smartcroppr#readme"
+}
