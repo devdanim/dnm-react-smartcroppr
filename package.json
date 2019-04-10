@@ -17,5 +17,8 @@
   "bugs": {
     "url": "https://github.com/devdanim/dnm-react-smartcroppr/issues"
   },
-  "homepage": "https://github.com/devdanim/dnm-react-smartcroppr#readme"
+  "homepage": "https://github.com/devdanim/dnm-react-smartcroppr#readme",
+  "dependencies": {
+    "dnm-smartcroppr": "1.1.2"
+  }
 }
