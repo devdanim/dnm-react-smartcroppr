@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "git": "git add . && git commit -m",
-    "postgit": "git push -u"
+    "postgit": "git push -u",
+    "dev": "parcel examples/index.html -d examples/dev --open",
+    "build": "parcel build examples/index.html -d examples/dist"
   },
   "repository": {
     "type": "git",
@@ -22,7 +24,15 @@
     "dnm-smartcroppr": "1.1.2"
   },
   "peerDependencies": {
-    "react": "^16.8.0",
-    "react-dom": "^16.8.0"
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-react": "^6.24.1",
+    "parcel-bundler": "^1.12.3",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6"
   }
 }

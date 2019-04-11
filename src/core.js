@@ -1,6 +1,11 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import BaseSmartCroppr from 'dnm-smartcroppr'
 export default class SmartCroppr extends React.Component {
     constructor(props) {
         super(props);
+
+        this.handleLoad = this.handleLoad.bind(this);
     }
 
     componentDidUpdate(prevProps) {
@@ -60,13 +65,13 @@ export default class SmartCroppr extends React.Component {
                     startSize[3] = false;
                 }
             }
-
-            this.croppr = new SmartCroppr(this.refs.img, {
-                returnMode: 'real',
+            
+            this.croppr = new BaseSmartCroppr(this.refs.img, {
+                returnMode: this.props.mode,
                 responsive: true,
                 aspectRatio: this.props.aspectRatio,
                 maxAspectRatio: this.props.maxAspectRatio,
-                smartcrop: this.props.smartCrop,
+                smartcrop: this.props.crop ? false : this.props.smartCrop,
                 smartOptions: this.props.smartCropOptions,
                 startPosition: startPosition,
                 startSize: startSize,
@@ -81,7 +86,7 @@ export default class SmartCroppr extends React.Component {
     render() {
         return (
             <div className="cropper">
-                <img alt ref="img" onLoad={this.handleLoad} src={this.props.src}/>
+                <img alt="" ref="img" onLoad={this.handleLoad} src={this.props.src}/>
             </div>
         );
     }
