@@ -1,38 +1,51 @@
 {
   "name": "dnm-react-smartcroppr",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "React cropper based on dnm-smartcroppr",
-  "main": "index.js",
+  "main": "dist/dnm-react-smartcroppr.min.js",
   "scripts": {
     "git": "git add . && git commit -m",
     "postgit": "git push -u",
     "dev": "parcel examples/index.html -d examples/dev --open",
-    "build": "parcel build examples/index.html -d examples/dist"
+    "build:dev": "rollup --config rollup/rollup.config.dev.js",
+    "build:prod": "rollup --config rollup/rollup.config.prod.js",
+    "watch": "onchange \"src/**/*.*\" -v -- npm run build:dev",
+    "dist": "rm -rf examples/dev && npm run build:dev && npm run build:prod"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/devdanim/dnm-react-smartcroppr.git"
+    "url": "git+https://github.com/devdanim/sdnm-react-smartcroppr.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "devdanim",
+  "contributors": [
+    "keywinf",
+    "fadrien"
+  ],
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/devdanim/dnm-react-smartcroppr/issues"
   },
   "homepage": "https://github.com/devdanim/dnm-react-smartcroppr#readme",
-  "dependencies": {
-    "dnm-smartcroppr": "1.1.2"
-  },
   "peerDependencies": {
     "react": "^16.8.6",
     "react-dom": "^16.8.6"
   },
   "devDependencies": {
-    "babel-core": "^6.26.3",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-react": "^6.24.1",
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.2.2",
+    "@babel/preset-env": "^7.2.3",
+    "@babel/preset-react": "^7.0.0",
+    "dnm-smartcroppr": "1.1.2",
+    "onchange": "^5.2.0",
     "parcel-bundler": "^1.12.3",
     "react": "^16.8.6",
-    "react-dom": "^16.8.6"
+    "react-dom": "^16.8.6",
+    "rollup": "^1.0.0",
+    "rollup-plugin-babel": "^4.2.0",
+    "rollup-plugin-commonjs": "^9.2.0",
+    "rollup-plugin-node-resolve": "^4.0.0",
+    "rollup-plugin-postcss": "^1.6.3",
+    "rollup-plugin-terser": "^3.0.0"
   }
 }

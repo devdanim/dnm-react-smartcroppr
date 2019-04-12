@@ -4,7 +4,6 @@ import BaseSmartCroppr from 'dnm-smartcroppr'
 export default class SmartCroppr extends React.Component {
     constructor(props) {
         super(props);
-
         this.handleLoad = this.handleLoad.bind(this);
     }
 
