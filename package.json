@@ -4,7 +4,7 @@
   "description": "React cropper based on dnm-smartcroppr",
   "main": "dist/dnm-react-smartcroppr.min.js",
   "scripts": {
-    "git": "git add . && git commit -m",
+    "git": "npm run dist && git add . && git commit -m",
     "postgit": "git push -u",
     "dev": "parcel examples/index.html -d examples/dev --open",
     "build:dev": "rollup --config rollup/rollup.config.dev.js",
