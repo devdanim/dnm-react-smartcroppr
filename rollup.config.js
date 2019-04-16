@@ -3,8 +3,8 @@ import postcss from 'rollup-plugin-postcss';
 import resolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
 
-const moduleName = "SmartCroppr"
-const distName = "dnm-react-smartcroppr";
+const moduleName = 'SmartCroppr';
+const distName = 'dnm-react-smartcroppr';
 
 const rollupConfig = {
     input: 'src/index.js',
@@ -13,20 +13,21 @@ const rollupConfig = {
         format: 'umd',
         name: moduleName,
         globals: {
-        react: 'React',
-        'react-dom': 'ReactDOM',
-        'prop-types': 'PropTypes'
+            react: 'React',
+            'react-dom': 'ReactDOM',
+            'prop-types': 'PropTypes',
+            'lodash': '_'
         }
     },
-    external: ['react', 'react-dom', 'prop-types'],
-    plugins: [ 
+    external: ['react', 'react-dom', 'prop-types', 'lodash'],
+    plugins: [
         resolve(),
         babel({
-        exclude: "node_modules/**"
+            exclude: 'node_modules/**'
         }),
         commonjs(),
         postcss({
-            extensions: [ '.css' ]
+            extensions: ['.css']
         })
     ]
 }

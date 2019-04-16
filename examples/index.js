@@ -3,7 +3,7 @@ import { render } from 'react-dom';
 import SmartCroppr from '../dist/dnm-react-smartcroppr'
 
 render(
-    <div style={{position: "relative", maxWidth: "500px", width:"100%", margin: "auto"}}>
+    <div style={{position: 'relative', maxWidth: '500px', width: '100%', margin: 'auto'}}>
       <SmartCroppr
         aspectRatio={2}
         //crop={{x:0, y:0, width: 450, height: 600}}
@@ -23,7 +23,6 @@ render(
             console.log("Smartcrop", data)
           }
         }}
-        //src="https://source.unsplash.com/random"
         src="https://images.unsplash.com/photo-1554676187-e9a89ddb659e?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=1080&fit=max&ixid=eyJhcHBfaWQiOjF9"
       />
     </div>,

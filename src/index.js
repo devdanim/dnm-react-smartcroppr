@@ -1,2 +1,3 @@
-import SmartCroppr from './core'
+import SmartCroppr from './core';
+
 export default SmartCroppr;

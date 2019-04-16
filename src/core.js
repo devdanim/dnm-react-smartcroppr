@@ -1,9 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import BaseSmartCroppr from 'dnm-smartcroppr'
+import BaseSmartCroppr from 'dnm-smartcroppr';
+const _ = {
+    isEqual: require('lodash/isEqual'),
+};
+
 export default class SmartCroppr extends React.Component {
     constructor(props) {
         super(props);
+
         this.handleLoad = this.handleLoad.bind(this);
     }
 
