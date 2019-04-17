@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from 'react-dom';
-import SmartCroppr from '../dist/dnm-react-smartcroppr'
+import SmartCroppr from '../dist/dnm-react-smartcroppr.es';
 
 render(
     <div style={{position: 'relative', maxWidth: '500px', width: '100%', margin: 'auto'}}>
