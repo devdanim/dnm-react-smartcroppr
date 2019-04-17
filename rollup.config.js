@@ -16,10 +16,9 @@ const rollupConfig = {
             react: 'React',
             'react-dom': 'ReactDOM',
             'prop-types': 'PropTypes',
-            'lodash': '_'
         }
     },
-    external: ['react', 'react-dom', 'prop-types', 'lodash'],
+    external: ['react', 'react-dom', 'prop-types'],
     plugins: [
         resolve(),
         babel({
