@@ -2,7 +2,8 @@
   "name": "dnm-react-smartcroppr",
   "version": "1.1.5",
   "description": "React cropper based on dnm-smartcroppr",
-  "main": "dist/dnm-react-smartcroppr.min.js",
+  "main": "dist/dnm-react-smartcroppr.umd.min.js",
+  "module": "dist/dnm-react-smartcroppr.es.min.js",
   "scripts": {
     "git": "npm run dist && git add . && git commit -m",
     "postgit": "git push -u",
