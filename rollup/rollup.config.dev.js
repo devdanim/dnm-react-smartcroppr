@@ -1,5 +1,7 @@
 import rollupConfig from '../rollup.config';
 
-rollupConfig.output.file += '.js';
+rollupConfig.forEach(config => {
+    config.output.file += '.js';
+});
 
 export default rollupConfig;

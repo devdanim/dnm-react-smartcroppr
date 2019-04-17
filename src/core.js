@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import BaseSmartCroppr from 'dnm-smartcroppr';
-const _ = {
-    isEqual: require('lodash/isEqual'),
-};
+// lodash
+import isEqual from 'lodash-es/isEqual';
+const _ = { isEqual };
 
 export default class SmartCroppr extends React.Component {
     constructor(props) {

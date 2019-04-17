@@ -1,7 +1,9 @@
 import rollupConfig from '../rollup.config';
-import {terser} from "rollup-plugin-terser";
+import { terser } from "rollup-plugin-terser";
 
-rollupConfig.output.file += '.min.js';
-rollupConfig.plugins.push(terser());
+rollupConfig.forEach(config => {
+    config.output.file += '.min.js';
+    config.plugins.push(terser());
+});
 
 export default rollupConfig;

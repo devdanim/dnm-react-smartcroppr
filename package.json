@@ -11,8 +11,8 @@
     "build:prod": "rollup --config rollup/rollup.config.prod.js",
     "watch": "npm run build:dev && onchange \"src/**/*.*\" -v -- npm run build:dev",
     "dist": "rm -rf examples/dev && npm run build:dev && npm run build:prod",
-    "login": "npm-login-noninteractive",
-    "publish": "npm run login; npm run dist && npm publish"
+    "login:nint": "npm-login-noninteractive",
+    "pkg": "npm run dist && npm publish"
   },
   "repository": {
     "type": "git",
@@ -39,6 +39,7 @@
     "@babel/preset-env": "^7.4.3",
     "@babel/preset-react": "^7.0.0",
     "dnm-smartcroppr": "1.1.2",
+    "npm-login-noninteractive": "^0.1.4",
     "onchange": "^5.2.0",
     "parcel-bundler": "^1.12.3",
     "lodash": "^4.17.10",
