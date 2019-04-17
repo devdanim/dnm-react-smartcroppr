@@ -5208,6 +5208,10 @@
 
   }
 
+  var _ = {
+    isEqual: require('lodash/isEqual')
+  };
+
   var SmartCroppr$1 =
   /*#__PURE__*/
   function (_React$Component) {
