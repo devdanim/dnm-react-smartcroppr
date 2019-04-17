@@ -10,7 +10,9 @@
     "build:dev": "rollup --config rollup/rollup.config.dev.js",
     "build:prod": "rollup --config rollup/rollup.config.prod.js",
     "watch": "npm run build:dev && onchange \"src/**/*.*\" -v -- npm run build:dev",
-    "dist": "rm -rf examples/dev && npm run build:dev && npm run build:prod"
+    "dist": "rm -rf examples/dev && npm run build:dev && npm run build:prod",
+    "login": "npm-login-noninteractive",
+    "publish": "npm run login; npm run dist && npm publish"
   },
   "repository": {
     "type": "git",
