@@ -673,36 +673,34 @@ class CropprCore {
 
     };
 
-
     if(this.options.responsive) {
       let onResize;
-      const resizeFunc = () => {
-        let newOptions = this.options;
-        let cropData = this.responsiveData;
-
-        const controlKeys = ["x","y","width","height"];
-        for(var i=0; i<controlKeys.length; i++) {
-          cropData[controlKeys[i]] *= 100;
-          cropData[controlKeys[i]] = cropData[controlKeys[i]] > 100 ? 100 : cropData[controlKeys[i]] < 0 ? 0 : cropData[controlKeys[i]];
-        }
-
-        newOptions.startPosition = [cropData.x, cropData.y, "%"];
-        newOptions.startSize = [cropData.width, cropData.height, "%"];
-        newOptions = this.parseOptions(newOptions);
-        
-        this.showModal("onResize");
-        this.initializeBox(newOptions);
-        this.resetModal("onResize");
-        
-      };
-      window.onresize = function() {
+      window.onresize = () => {
           clearTimeout(onResize);
           onResize = setTimeout(() => {
-              resizeFunc();
+              this.forceRedraw();
           }, 100);
       };
     }
 
+  }
+
+  forceRedraw() {
+    let newOptions = this.options;
+    let cropData = this.responsiveData;
+
+    const controlKeys = ["x","y","width","height"];
+    for(var i=0; i<controlKeys.length; i++) {
+      cropData[controlKeys[i]] = cropData[controlKeys[i]] > 1 ? 1 : cropData[controlKeys[i]] < 0 ? 0 : cropData[controlKeys[i]];
+    }
+
+    newOptions.startPosition = [cropData.x, cropData.y, "ratio"];
+    newOptions.startSize = [cropData.width, cropData.height, "ratio"];
+    newOptions = this.parseOptions(newOptions);
+    
+    this.showModal("onResize");
+    this.initializeBox(newOptions);
+    this.resetModal("onResize");
   }
 
 
@@ -1055,23 +1053,23 @@ class CropprCore {
       const { width, height } = this.imageEl.getBoundingClientRect();
       this.resetModal();
       if (data.width) {
-        data.width = (data.width / 100) * width;
+        data.width *= width;
       } 
       if (data.x) {
-        data.x = (data.x / 100) * width;
+        data.x *= width;
       }
 
       if (data.height) {
-        data.height = (data.height / 100) * height;
+        data.height *= height;
       } 
       if (data.y) {
-        data.y = (data.y / 100) * height;
+        data.y *= height;
       } 
       return data;
     };
-    if(inputMode === "real" && outputMode === "px") {
+    if(inputMode === "real" && outputMode === "raw") {
       return convertRealDataToPixel(data)
-    } else if(inputMode === "%" && outputMode === "px") {
+    } else if(inputMode === "ratio" && outputMode === "raw") {
       return convertPercentToPixel(data)
     }
     return null
@@ -1089,10 +1087,10 @@ class CropprCore {
     for (let i = 0; i < sizeKeys.length; i++) {
       const key = sizeKeys[i];
       if (opts[key] !== null) {
-        if (opts[key].unit == '%') {
-          opts[key] = this.convertor(opts[key], "%", "px");
-        } else if(opts[key].real === true) {
-          opts[key] = this.convertor(opts[key], "real", "px");
+        if (opts[key].unit == 'ratio') {
+          opts[key] = this.convertor(opts[key], "ratio", "raw");
+        } else if(opts[key].unit === 'real') {
+          opts[key] = this.convertor(opts[key], "real", "raw");
         }
         delete opts[key].unit;
       }
@@ -1550,9 +1548,9 @@ class CropprCore {
     const defaults = {
       aspectRatio: null,
       maxAspectRatio: null,
-      maxSize: { width: null, height: null, unit: 'px', real: false },
-      minSize: { width: null, height: null, unit: 'px', real: false },
-      startSize: { width: 100, height: 100, unit: '%', real: false },
+      maxSize: { width: null, height: null, unit: 'raw' },
+      minSize: { width: null, height: null, unit: 'raw' },
+      startSize: { width: 1, height: 1, unit: 'ratio' },
       startPosition: null,
       returnMode: 'real',
       onInitialize: null,
@@ -1601,8 +1599,7 @@ class CropprCore {
       maxSize = {
         width: opts.maxSize[0] || null,
         height: opts.maxSize[1] || null,
-        unit: opts.maxSize[2] || 'px',
-        real: opts.minSize[3] || false
+        unit: opts.maxSize[2] || 'raw'
       };
     }
 
@@ -1612,8 +1609,7 @@ class CropprCore {
       minSize = {
         width: opts.minSize[0] || null,
         height: opts.minSize[1] || null,
-        unit: opts.minSize[2] || 'px',
-        real: opts.minSize[3] || false
+        unit: opts.minSize[2] || 'raw'
       };
     }
 
@@ -1623,8 +1619,7 @@ class CropprCore {
       startSize = {
         width: opts.startSize[0] || null,
         height: opts.startSize[1] || null,
-        unit: opts.startSize[2] || '%',
-        real: opts.startSize[3] || false
+        unit: opts.startSize[2] || 'ratio'
       };
     }
 
@@ -1634,8 +1629,7 @@ class CropprCore {
       startPosition = {
         x: opts.startPosition[0] || null,
         y: opts.startPosition[1] || null,
-        unit: opts.startPosition[2] || '%',
-        real: opts.startPosition[3] || false
+        unit: opts.startPosition[2] || 'ratio'
       };
     }
 
@@ -1753,12 +1747,12 @@ class Croppr extends CropprCore {
    * @param {Number} x
    * @param {Number} y
    */
-  moveTo(x, y, constrain = true, mode = "px") {
+  moveTo(x, y, constrain = true, mode = "raw") {
 
     this.showModal("moveTo");
 
-    if(mode === "%" || mode === "real") {
-      let data = this.convertor( {x, y} , mode, "px");
+    if(mode === "ratio" || mode === "real") {
+      let data = this.convertor( {x, y} , mode, "raw");
       x = data.x;
       y = data.y;
     }
@@ -1784,16 +1778,16 @@ class Croppr extends CropprCore {
    * @param {Array} origin The origin point to resize from.
    *      Defaults to [0.5, 0.5] (center).
    */
-  resizeTo(width, height, origin = null, constrain = true, mode = "px") {
+  resizeTo(width, height, origin = null, constrain = true, mode = "raw") {
 
     this.showModal("resize");
 
-    if(mode === "%" || mode === "real") {
+    if(mode === "ratio" || mode === "real") {
       let data = {
         width: width,
         height: height
       };
-      data = this.convertor( data, mode, "px");
+      data = this.convertor( data, mode, "raw");
       width = data.width;
       height = data.height;
     }
@@ -1814,12 +1808,12 @@ class Croppr extends CropprCore {
     return this;
   }
 
-  setValue(data, constrain = true, mode = "%") {
+  setValue(data, constrain = true, mode = "ratio") {
 
     this.showModal("setValue");
 
-    if(mode === "%" || mode === "real") {
-      data = this.convertor(data, mode, "px");
+    if(mode === "ratio" || mode === "real") {
+      data = this.convertor(data, mode, "raw");
     }
 
     this.moveTo(data.x, data.y, false);
@@ -4956,7 +4950,7 @@ class SmartCroppr extends Croppr {
 
     let defaultSmartOptions = {
       face: false,
-      facePreResize: 768,
+      preResize: 768,
       minScale: null,
       minWidth: null,
       minHeight: null,
@@ -4970,13 +4964,13 @@ class SmartCroppr extends Croppr {
 
     for(var key in defaultSmartOptions) {
       let defaultValue = defaultSmartOptions[key];
-      if(options.smartOptions && options.smartOptions[key]) {
+      if(options.smartOptions && typeof options.smartOptions[key] !== "undefined") {
         defaultValue = options.smartOptions[key];
       } 
       this.smartOptions[key] = defaultValue; 
     }
 
-    if(!this.smartOptions.face) this.smartOptions.facePreResize = null;
+    if(!options.preResize && this.smartOptions.face === false) this.smartOptions.preResize = 0;
 
     let tempMinRatio = options.aspectRatio ? options.aspectRatio : this.smartOptions.aspectRatio ? this.smartOptions.aspectRatio : null;
     let tempMaxRatio = options.maxAspectRatio ? options.maxAspectRatio : this.smartOptions.maxAspectRatio ? this.smartOptions.maxAspectRatio : null;
@@ -5048,18 +5042,19 @@ class SmartCroppr extends Croppr {
 
   setBestCrop(smartOptions, crop = true) {
 
-    const maxDimension = smartOptions.facePreResize;
+    const maxDimension = smartOptions.preResize;
 
-    let size = this.getSizeFromRatios();
+    const size = this.getSizeFromRatios();
 
-    if(size) {
+    smartOptions.minScale = size.minScale;
+    smartOptions.width = size.width;
+    smartOptions.height = size.height;
+    smartOptions.perfectRatio = size.perfectRatio;
 
-      smartOptions.minScale = size.minScale;
-      smartOptions.width = size.width;
-      smartOptions.height = size.height;
-      smartOptions.perfectRatio = size.perfectRatio;
-      
-
+    if(!smartOptions.width || !smartOptions.height) {
+      smartOptions.skipSmartCrop = true;
+      this.launchSmartCrop(this.imageEl, smartOptions);
+    } else {
       //Function used in testbed of smartcrop.js repo, because tracking.js is very slow with big images
       const scaleImage = (img, maxDimension, callback) => {
           var width = img.naturalWidth || img.width;
@@ -5081,20 +5076,13 @@ class SmartCroppr extends Croppr {
         if(this.debug) console.log("debug - IMAGE IS SCALED : ", scale);
         this.launchSmartCrop(new_img, smartOptions, scale, crop);
       };
-
+  
       var img = new Image();
       img.crossOrigin = 'anonymous';
       img.src = this.imageEl.src; 
       img.onload = function() {
-
         scaleImage(img, maxDimension, scaleImageCallback);
-
       };
-
-    } else {
-
-      setSmartCrop();
-
     }
 
   }
@@ -5111,7 +5099,7 @@ class SmartCroppr extends Croppr {
       if(!data) data = null;
       this.smartCropData = null;
       if(data && crop === true) {
-        this.setValue(data, false, "real");
+        this.setValue(data, true, "real");
       }
     };
 
@@ -5131,17 +5119,18 @@ class SmartCroppr extends Croppr {
       }
 
       const cropCallback = data => {
+        const cloned_data = JSON.parse(JSON.stringify(data));
         setSmartCrop(data);
-        if(options.onSmartCropDone) options.onSmartCropDone(data);
+        if(options.onSmartCropDone) options.onSmartCropDone(cloned_data);
       };
 
-      if(options.minScale === 1 && options.perfectRatio) {
+      if(options.skipSmartCrop || (options.minScale === 1 && options.perfectRatio) ) {
         cropCallback(null);
       } else {
         smartcrop.crop(img, options).then( result => {
           if(this.debug) console.log("debug - RAW DATA : ", result.topCrop);
           let smartCropData = convertValuesWithScale(result.topCrop, scale);
-          if(this.debug) console.log("debug - CONVERT DATA : ", smartCropData);
+          if(this.debug) console.log("debug - CONVERTED DATA : ", smartCropData);
           cropCallback(smartCropData);
         });
       }
