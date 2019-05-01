@@ -26,9 +26,9 @@ export default class SmartCroppr extends React.Component {
                 this.croppr.setImage(
                     this.props.src,
                     () => this.croppr.setValue(
-                        crop || {x: 0, y: 0, width: 100, height: 100},
+                        crop || {x: 0, y: 0, width: 1, height: 1},
                         true,
-                        this.props.mode || '%'
+                        this.props.mode || 'ratio'
                     ),
                     false
                 );
@@ -42,47 +42,41 @@ export default class SmartCroppr extends React.Component {
         if (typeof this.firstLoadDone === 'undefined') {
             this.firstLoadDone = true;
 
-            // startPosition
-            let startPosition = [0, 0, 'px', false];
-            if (this.props.crop) {
-                startPosition[0] = this.props.crop.x;
-                startPosition[1] = this.props.crop.y;
-                if (this.props.mode === 'real') {
-                    startPosition[2] = 'px';
-                    startPosition[3] = true;
-                } else {
-                    startPosition[2] = this.props.mode === "ratio" ? "%" : "px";
-                    startPosition[3] = false;
-                }
-            }
+            const { 
+                smartCrop,
+                crop, 
+                mode, 
+                aspectRatio, 
+                maxAspectRatio, 
+                smartCropOptions, 
+                onCropEnd, 
+                onCropStart, 
+                onCropMove, 
+                onInit 
+            } = this.props;
 
-            // startSize
-            let startSize = [100, 100, '%', false];
-            if (this.props.crop) {
-                startSize[0] = this.props.crop.width;
-                startSize[1] = this.props.crop.height;
-                if (this.props.mode === 'real') {
-                    startSize[2] = 'px';
-                    startSize[3] = true;
-                } else {
-                    startSize[2] = this.props.mode === "ratio" ? "%" : "px";
-                    startSize[3] = false;
-                }
+            // startPosition
+            let startPosition = [0, 0, 'real'];
+            let startSize = [1, 1, 'ratio'];
+            if (crop) {
+                const { x, y, width, height } = crop;
+                startPosition = [x, y, crop.mode || mode];
+                startSize = [width, height, crop.mode || mode];
             }
             
             this.croppr = new BaseSmartCroppr(this.refs.img, {
-                returnMode: this.props.mode,
+                returnMode: mode,
                 responsive: true,
-                aspectRatio: this.props.aspectRatio,
-                maxAspectRatio: this.props.maxAspectRatio,
-                smartcrop: this.props.crop ? false : this.props.smartCrop,
-                smartOptions: this.props.smartCropOptions,
-                startPosition: startPosition,
-                startSize: startSize,
-                onCropEnd: this.props.onCropEnd,
-                onCropStart: this.props.onCropStart,
-                onCropMove: this.props.onCropMove,
-                onInitialize: this.props.onInit,
+                aspectRatio,
+                maxAspectRatio,
+                smartcrop: crop ? false : smartCrop,
+                smartOptions: smartCropOptions,
+                startPosition,
+                startSize,
+                onCropEnd,
+                onCropStart,
+                onCropMove,
+                onInitialize: onInit,
             });
         }
     }

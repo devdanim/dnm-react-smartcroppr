@@ -5237,9 +5237,9 @@ function (_React$Component) {
             return _this2.croppr.setValue(crop || {
               x: 0,
               y: 0,
-              width: 100,
-              height: 100
-            }, true, _this2.props.mode || '%');
+              width: 1,
+              height: 1
+            }, true, _this2.props.mode || 'ratio');
           }, false);
         }
       } else if (!_.isEqual(prevProps.crop, this.props.crop) || prevProps.mode !== this.props.mode) {
@@ -5250,52 +5250,44 @@ function (_React$Component) {
     key: "handleLoad",
     value: function handleLoad(ev) {
       if (typeof this.firstLoadDone === 'undefined') {
-        this.firstLoadDone = true; // startPosition
+        this.firstLoadDone = true;
+        var _this$props = this.props,
+            smartCrop = _this$props.smartCrop,
+            crop = _this$props.crop,
+            mode = _this$props.mode,
+            aspectRatio = _this$props.aspectRatio,
+            maxAspectRatio = _this$props.maxAspectRatio,
+            smartCropOptions = _this$props.smartCropOptions,
+            onCropEnd = _this$props.onCropEnd,
+            onCropStart = _this$props.onCropStart,
+            onCropMove = _this$props.onCropMove,
+            onInit = _this$props.onInit; // startPosition
 
-        var startPosition = [0, 0, 'px', false];
+        var startPosition = [0, 0, 'real'];
+        var startSize = [1, 1, 'ratio'];
 
-        if (this.props.crop) {
-          startPosition[0] = this.props.crop.x;
-          startPosition[1] = this.props.crop.y;
-
-          if (this.props.mode === 'real') {
-            startPosition[2] = 'px';
-            startPosition[3] = true;
-          } else {
-            startPosition[2] = this.props.mode === "ratio" ? "%" : "px";
-            startPosition[3] = false;
-          }
-        } // startSize
-
-
-        var startSize = [100, 100, '%', false];
-
-        if (this.props.crop) {
-          startSize[0] = this.props.crop.width;
-          startSize[1] = this.props.crop.height;
-
-          if (this.props.mode === 'real') {
-            startSize[2] = 'px';
-            startSize[3] = true;
-          } else {
-            startSize[2] = this.props.mode === "ratio" ? "%" : "px";
-            startSize[3] = false;
-          }
+        if (crop) {
+          var x = crop.x,
+              y = crop.y,
+              width = crop.width,
+              height = crop.height;
+          startPosition = [x, y, crop.mode || mode];
+          startSize = [width, height, crop.mode || mode];
         }
 
         this.croppr = new SmartCroppr(this.refs.img, {
-          returnMode: this.props.mode,
+          returnMode: mode,
           responsive: true,
-          aspectRatio: this.props.aspectRatio,
-          maxAspectRatio: this.props.maxAspectRatio,
-          smartcrop: this.props.crop ? false : this.props.smartCrop,
-          smartOptions: this.props.smartCropOptions,
+          aspectRatio: aspectRatio,
+          maxAspectRatio: maxAspectRatio,
+          smartcrop: crop ? false : smartCrop,
+          smartOptions: smartCropOptions,
           startPosition: startPosition,
           startSize: startSize,
-          onCropEnd: this.props.onCropEnd,
-          onCropStart: this.props.onCropStart,
-          onCropMove: this.props.onCropMove,
-          onInitialize: this.props.onInit
+          onCropEnd: onCropEnd,
+          onCropStart: onCropStart,
+          onCropMove: onCropMove,
+          onInitialize: onInit
         });
       }
     }
