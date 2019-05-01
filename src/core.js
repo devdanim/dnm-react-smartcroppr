@@ -10,6 +10,10 @@ export default class SmartCroppr extends React.Component {
         super(props);
 
         this.handleLoad = this.handleLoad.bind(this);
+        window.setValue = () => {
+            const crop = this.croppr.getValue('real');
+            this.croppr.setValue(crop, true, 'real');
+        }
     }
 
     componentDidUpdate(prevProps) {
@@ -28,13 +32,17 @@ export default class SmartCroppr extends React.Component {
                     () => this.croppr.setValue(
                         crop || {x: 0, y: 0, width: 1, height: 1},
                         true,
-                        this.props.mode || 'ratio'
+                        crop ? this.props.mode : 'ratio'
                     ),
                     false
                 );
             }
         } else if (!_.isEqual(prevProps.crop, this.props.crop) || prevProps.mode !== this.props.mode) {
-            this.croppr.setValue(crop, true, this.props.mode);
+            this.croppr.setValue(
+                crop || { x: 0, y: 0, width: 1, height: 1 }, 
+                true, 
+                crop ? this.props.mode : 'ratio'
+            );
         }
     }
 
@@ -77,6 +85,7 @@ export default class SmartCroppr extends React.Component {
                 onCropStart,
                 onCropMove,
                 onInitialize: onInit,
+                debug:true,
             });
         }
     }
