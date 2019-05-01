@@ -678,34 +678,36 @@
 
       };
 
+
       if(this.options.responsive) {
         let onResize;
-        window.onresize = () => {
+        const resizeFunc = () => {
+          let newOptions = this.options;
+          let cropData = this.responsiveData;
+
+          const controlKeys = ["x","y","width","height"];
+          for(var i=0; i<controlKeys.length; i++) {
+            cropData[controlKeys[i]] *= 100;
+            cropData[controlKeys[i]] = cropData[controlKeys[i]] > 100 ? 100 : cropData[controlKeys[i]] < 0 ? 0 : cropData[controlKeys[i]];
+          }
+
+          newOptions.startPosition = [cropData.x, cropData.y, "%"];
+          newOptions.startSize = [cropData.width, cropData.height, "%"];
+          newOptions = this.parseOptions(newOptions);
+          
+          this.showModal("onResize");
+          this.initializeBox(newOptions);
+          this.resetModal("onResize");
+          
+        };
+        window.onresize = function() {
             clearTimeout(onResize);
             onResize = setTimeout(() => {
-                this.forceRedraw();
+                resizeFunc();
             }, 100);
         };
       }
 
-    }
-
-    forceRedraw() {
-      let newOptions = this.options;
-      let cropData = this.responsiveData;
-
-      const controlKeys = ["x","y","width","height"];
-      for(var i=0; i<controlKeys.length; i++) {
-        cropData[controlKeys[i]] = cropData[controlKeys[i]] > 1 ? 1 : cropData[controlKeys[i]] < 0 ? 0 : cropData[controlKeys[i]];
-      }
-
-      newOptions.startPosition = [cropData.x, cropData.y, "ratio"];
-      newOptions.startSize = [cropData.width, cropData.height, "ratio"];
-      newOptions = this.parseOptions(newOptions);
-      
-      this.showModal("onResize");
-      this.initializeBox(newOptions);
-      this.resetModal("onResize");
     }
 
 
@@ -1058,23 +1060,23 @@
         const { width, height } = this.imageEl.getBoundingClientRect();
         this.resetModal();
         if (data.width) {
-          data.width *= width;
+          data.width = (data.width / 100) * width;
         } 
         if (data.x) {
-          data.x *= width;
+          data.x = (data.x / 100) * width;
         }
 
         if (data.height) {
-          data.height *= height;
+          data.height = (data.height / 100) * height;
         } 
         if (data.y) {
-          data.y *= height;
+          data.y = (data.y / 100) * height;
         } 
         return data;
       };
-      if(inputMode === "real" && outputMode === "raw") {
+      if(inputMode === "real" && outputMode === "px") {
         return convertRealDataToPixel(data)
-      } else if(inputMode === "ratio" && outputMode === "raw") {
+      } else if(inputMode === "%" && outputMode === "px") {
         return convertPercentToPixel(data)
       }
       return null
@@ -1092,10 +1094,10 @@
       for (let i = 0; i < sizeKeys.length; i++) {
         const key = sizeKeys[i];
         if (opts[key] !== null) {
-          if (opts[key].unit == 'ratio') {
-            opts[key] = this.convertor(opts[key], "ratio", "raw");
-          } else if(opts[key].unit === 'real') {
-            opts[key] = this.convertor(opts[key], "real", "raw");
+          if (opts[key].unit == '%') {
+            opts[key] = this.convertor(opts[key], "%", "px");
+          } else if(opts[key].real === true) {
+            opts[key] = this.convertor(opts[key], "real", "px");
           }
           delete opts[key].unit;
         }
@@ -1553,9 +1555,9 @@
       const defaults = {
         aspectRatio: null,
         maxAspectRatio: null,
-        maxSize: { width: null, height: null, unit: 'raw' },
-        minSize: { width: null, height: null, unit: 'raw' },
-        startSize: { width: 1, height: 1, unit: 'ratio' },
+        maxSize: { width: null, height: null, unit: 'px', real: false },
+        minSize: { width: null, height: null, unit: 'px', real: false },
+        startSize: { width: 100, height: 100, unit: '%', real: false },
         startPosition: null,
         returnMode: 'real',
         onInitialize: null,
@@ -1604,7 +1606,8 @@
         maxSize = {
           width: opts.maxSize[0] || null,
           height: opts.maxSize[1] || null,
-          unit: opts.maxSize[2] || 'raw'
+          unit: opts.maxSize[2] || 'px',
+          real: opts.minSize[3] || false
         };
       }
 
@@ -1614,7 +1617,8 @@
         minSize = {
           width: opts.minSize[0] || null,
           height: opts.minSize[1] || null,
-          unit: opts.minSize[2] || 'raw'
+          unit: opts.minSize[2] || 'px',
+          real: opts.minSize[3] || false
         };
       }
 
@@ -1624,7 +1628,8 @@
         startSize = {
           width: opts.startSize[0] || null,
           height: opts.startSize[1] || null,
-          unit: opts.startSize[2] || 'ratio'
+          unit: opts.startSize[2] || '%',
+          real: opts.startSize[3] || false
         };
       }
 
@@ -1634,7 +1639,8 @@
         startPosition = {
           x: opts.startPosition[0] || null,
           y: opts.startPosition[1] || null,
-          unit: opts.startPosition[2] || 'ratio'
+          unit: opts.startPosition[2] || '%',
+          real: opts.startPosition[3] || false
         };
       }
 
@@ -1752,12 +1758,12 @@
      * @param {Number} x
      * @param {Number} y
      */
-    moveTo(x, y, constrain = true, mode = "raw") {
+    moveTo(x, y, constrain = true, mode = "px") {
 
       this.showModal("moveTo");
 
-      if(mode === "ratio" || mode === "real") {
-        let data = this.convertor( {x, y} , mode, "raw");
+      if(mode === "%" || mode === "real") {
+        let data = this.convertor( {x, y} , mode, "px");
         x = data.x;
         y = data.y;
       }
@@ -1783,16 +1789,16 @@
      * @param {Array} origin The origin point to resize from.
      *      Defaults to [0.5, 0.5] (center).
      */
-    resizeTo(width, height, origin = null, constrain = true, mode = "raw") {
+    resizeTo(width, height, origin = null, constrain = true, mode = "px") {
 
       this.showModal("resize");
 
-      if(mode === "ratio" || mode === "real") {
+      if(mode === "%" || mode === "real") {
         let data = {
           width: width,
           height: height
         };
-        data = this.convertor( data, mode, "raw");
+        data = this.convertor( data, mode, "px");
         width = data.width;
         height = data.height;
       }
@@ -1813,12 +1819,12 @@
       return this;
     }
 
-    setValue(data, constrain = true, mode = "ratio") {
+    setValue(data, constrain = true, mode = "%") {
 
       this.showModal("setValue");
 
-      if(mode === "ratio" || mode === "real") {
-        data = this.convertor(data, mode, "raw");
+      if(mode === "%" || mode === "real") {
+        data = this.convertor(data, mode, "px");
       }
 
       this.moveTo(data.x, data.y, false);
@@ -5110,7 +5116,7 @@
         if(!data) data = null;
         this.smartCropData = null;
         if(data && crop === true) {
-          this.setValue(data, true, "real");
+          this.setValue(data, false, "real");
         }
       };
 
@@ -5130,9 +5136,8 @@
         }
 
         const cropCallback = data => {
-          const cloned_data = JSON.parse(JSON.stringify(data));
           setSmartCrop(data);
-          if(options.onSmartCropDone) options.onSmartCropDone(cloned_data);
+          if(options.onSmartCropDone) options.onSmartCropDone(data);
         };
 
         if(options.minScale === 1 && options.perfectRatio) {
@@ -5141,7 +5146,7 @@
           smartcrop.crop(img, options).then( result => {
             if(this.debug) console.log("debug - RAW DATA : ", result.topCrop);
             let smartCropData = convertValuesWithScale(result.topCrop, scale);
-            if(this.debug) console.log("debug - CONVERTED DATA : ", smartCropData);
+            if(this.debug) console.log("debug - CONVERT DATA : ", smartCropData);
             cropCallback(smartCropData);
           });
         }
@@ -7240,9 +7245,7 @@
     _createClass(SmartCroppr$1, [{
       key: "componentWillUnmount",
       value: function componentWillUnmount() {
-        if (this.croppr) {
-          this.croppr.destroy();
-        }
+        if (this.croppr) this.croppr.destroy();
       }
     }, {
       key: "componentDidUpdate",
@@ -7252,27 +7255,23 @@
         var crop = this.props.crop ? JSON.parse(JSON.stringify(this.props.crop)) : null; // JSON.parse(JSON.stringify()) to avoid method to modify ours props!
 
         if (prevProps.src !== this.props.src) {
-          if (this.props.smartCrop) {
-            this.croppr.setImage(this.props.src, null, true, this.props.smartCropOptions);
-          } else {
-            this.croppr.setImage(this.props.src, function () {
-              return _this2.croppr.setValue(crop || {
-                x: 0,
-                y: 0,
-                width: 1,
-                height: 1
-              }, true, crop ? _this2.props.mode : 'ratio');
-            }, false);
-          }
+          if (this.props.smartCrop) this.croppr.setImage(this.props.src, null, true, this.props.smartCropOptions);else this.croppr.setImage(this.props.src, function () {
+            return _this2.croppr.setValue(crop || {
+              x: 0,
+              y: 0,
+              width: 1,
+              height: 1
+            }, true, crop ? _this2.props.mode : 'ratio');
+          }, false);
         } else if (!_.isEqual(prevProps.crop, this.props.crop) || prevProps.mode !== this.props.mode) {
-          var updateisNeeded = true;
+          var updateIsNeeded = true;
 
           if (crop) {
             var activeCrop = this.croppr.getValue(this.props.mode);
-            if (isEqual(activeCrop, crop)) updateisNeeded = false;
+            if (isEqual(activeCrop, crop)) updateIsNeeded = false;
           }
 
-          if (updateisNeeded) {
+          if (updateIsNeeded) {
             this.croppr.setValue(crop || {
               x: 0,
               y: 0,
@@ -7282,9 +7281,7 @@
           }
         }
 
-        if (!_.isEqual(prevProps.style, this.props.style)) {
-          this.croppr.forceRedraw();
-        }
+        if (!_.isEqual(prevProps.style, this.props.style)) this.croppr.forceRedraw();
       }
     }, {
       key: "handleLoad",
@@ -7354,7 +7351,7 @@
     aspectRatio: PropTypes.number,
     crop: PropTypes.object,
     maxAspectRatio: PropTypes.number,
-    mode: PropTypes.oneOf(["ratio", "raw", "real"]),
+    mode: PropTypes.oneOf(['ratio', 'raw', 'real']),
     onCropEnd: PropTypes.func,
     onCropMove: PropTypes.func,
     onCropStart: PropTypes.func,

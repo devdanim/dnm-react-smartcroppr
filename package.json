@@ -13,7 +13,7 @@
     "watch": "npm run build:dev && onchange \"src/**/*.*\" -v -- npm run build:dev",
     "dist": "rm -rf examples/dev && npm run build:dev && npm run build:prod",
     "login:nint": "npm-login-noninteractive",
-    "pkg": "npm run dist && npm publish"
+    "pkg": "npm install; npm run dist && npm publish"
   },
   "repository": {
     "type": "git",
