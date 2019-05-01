@@ -7250,9 +7250,7 @@
       }
     }, {
       key: "componentDidMount",
-      value: function componentDidMount() {
-        window.dispatchEvent(new Event('resize'));
-        console.log("MOUNT");
+      value: function componentDidMount() {//window.dispatchEvent(new Event('resize'));
       }
     }, {
       key: "componentDidUpdate",
@@ -7263,8 +7261,10 @@
 
         if (prevProps.src !== this.props.src) {
           if (this.props.smartCrop) {
+            console.log("UPDATE", "setImage with smartcrop");
             this.croppr.setImage(this.props.src, null, true, this.props.smartCropOptions);
           } else {
+            console.log("UPDATE", "setImage without smartcrop");
             this.croppr.setImage(this.props.src, function () {
               return _this2.croppr.setValue(crop || {
                 x: 0,
@@ -7275,6 +7275,7 @@
             }, false);
           }
         } else if (!_.isEqual(prevProps.crop, this.props.crop) || prevProps.mode !== this.props.mode) {
+          console.log("UPDATE", "setValue");
           this.croppr.setValue(crop || {
             x: 0,
             y: 0,
