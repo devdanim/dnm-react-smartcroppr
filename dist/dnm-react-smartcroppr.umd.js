@@ -7298,7 +7298,7 @@
               startSize[2] = 'px';
               startSize[3] = true;
             } else {
-              startSize[2] = this.props.mode;
+              startSize[2] = this.props.mode === "ratio" ? "%" : "px";
               startSize[3] = false;
             }
           }
