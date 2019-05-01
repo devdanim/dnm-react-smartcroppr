@@ -7296,6 +7296,7 @@
     }, {
       key: "handleCropprInit",
       value: function handleCropprInit(croppr) {
+        console.log("INIT");
         var onInit = this.props.onInit;
         croppr.forceRedraw();
         window.redraw = croppr.forceRedraw;
