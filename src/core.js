@@ -3,7 +3,8 @@ import PropTypes from 'prop-types';
 import BaseSmartCroppr from 'dnm-smartcroppr';
 // lodash
 import isEqual from 'lodash-es/isEqual';
-const _ = { isEqual };
+
+const _ = {isEqual};
 
 export default class SmartCroppr extends React.Component {
     constructor(props) {
@@ -12,76 +13,69 @@ export default class SmartCroppr extends React.Component {
     }
 
     componentWillUnmount() {
-        if(this.croppr) {
-            this.croppr.destroy();
-        }
+        if (this.croppr) this.croppr.destroy();
     }
 
     componentDidUpdate(prevProps) {
         const crop = this.props.crop ? JSON.parse(JSON.stringify(this.props.crop)) : null; // JSON.parse(JSON.stringify()) to avoid method to modify ours props!
         if (prevProps.src !== this.props.src) {
-            if (this.props.smartCrop) {
-                this.croppr.setImage(
-                    this.props.src,
-                    null,
+            if (this.props.smartCrop) this.croppr.setImage(
+                this.props.src,
+                null,
+                true,
+                this.props.smartCropOptions
+            );
+            else this.croppr.setImage(
+                this.props.src,
+                () => this.croppr.setValue(
+                    crop || {x: 0, y: 0, width: 1, height: 1},
                     true,
-                    this.props.smartCropOptions
-                );
-            } else {
-                this.croppr.setImage(
-                    this.props.src,
-                    () => this.croppr.setValue(
-                        crop || {x: 0, y: 0, width: 1, height: 1},
-                        true,
-                        crop ? this.props.mode : 'ratio'
-                    ),
-                    false
-                );
-            }
+                    crop ? this.props.mode : 'ratio'
+                ),
+                false
+            );
         } else if (!_.isEqual(prevProps.crop, this.props.crop) || prevProps.mode !== this.props.mode) {
-            let updateisNeeded = true;
-            if(crop) {
+            let updateIsNeeded = true;
+            if (crop) {
                 const activeCrop = this.croppr.getValue(this.props.mode);
-                if(isEqual(activeCrop, crop)) updateisNeeded = false;
+                if (isEqual(activeCrop, crop)) updateIsNeeded = false;
             }
-            if(updateisNeeded) {
+            if (updateIsNeeded) {
                 this.croppr.setValue(
-                    crop || { x: 0, y: 0, width: 1, height: 1 }, 
-                    true, 
+                    crop || {x: 0, y: 0, width: 1, height: 1},
+                    true,
                     crop ? this.props.mode : 'ratio'
                 );
             }
         }
-        if(!_.isEqual(prevProps.style, this.props.style)) {
-            this.croppr.forceRedraw();
-        }
+        if (!_.isEqual(prevProps.style, this.props.style)) this.croppr.forceRedraw();
     }
 
     handleLoad(ev) {
         if (typeof this.firstLoadDone === 'undefined') {
             this.firstLoadDone = true;
 
-            const { 
+            const {
                 smartCrop,
-                crop, 
-                mode, 
-                aspectRatio, 
-                maxAspectRatio, 
-                smartCropOptions, 
-                onCropEnd, 
-                onCropStart, 
-                onCropMove, 
+                crop,
+                mode,
+                aspectRatio,
+                maxAspectRatio,
+                smartCropOptions,
+                onCropEnd,
+                onCropStart,
+                onCropMove,
                 onInit,
             } = this.props;
 
             let startPosition = [0, 0, 'real'];
             let startSize = [1, 1, 'ratio'];
             if (crop) {
-                const { x, y, width, height } = crop;
+                const {x, y, width, height} = crop;
                 startPosition = [x, y, crop.mode || mode];
                 startSize = [width, height, crop.mode || mode];
             }
-            
+
             this.croppr = new BaseSmartCroppr(this.refs.img, {
                 returnMode: mode,
                 responsive: true,
@@ -115,7 +109,7 @@ SmartCroppr.propTypes = {
     aspectRatio: PropTypes.number,
     crop: PropTypes.object,
     maxAspectRatio: PropTypes.number,
-    mode: PropTypes.oneOf(["ratio", "raw", "real"]),
+    mode: PropTypes.oneOf(['ratio', 'raw', 'real']),
     onCropEnd: PropTypes.func,
     onCropMove: PropTypes.func,
     onCropStart: PropTypes.func,
