@@ -7235,13 +7235,6 @@
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(SmartCroppr$1).call(this, props));
       _this.handleLoad = _this.handleLoad.bind(_assertThisInitialized(_this));
-
-      window.setValue = function () {
-        var crop = _this.croppr.getValue('real');
-
-        _this.croppr.setValue(crop, true, 'real');
-      };
-
       console.log("CONTRUCT");
       return _this;
     }
@@ -7258,6 +7251,7 @@
     }, {
       key: "componentDidMount",
       value: function componentDidMount() {
+        window.dispatchEvent(new Event('resize'));
         console.log("MOUNT");
       }
     }, {
@@ -7292,6 +7286,8 @@
     }, {
       key: "handleLoad",
       value: function handleLoad(ev) {
+        console.log("LOAD");
+
         if (typeof this.firstLoadDone === 'undefined') {
           this.firstLoadDone = true;
           var _this$props = this.props,

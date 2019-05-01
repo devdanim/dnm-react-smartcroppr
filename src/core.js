@@ -10,10 +10,6 @@ export default class SmartCroppr extends React.Component {
         super(props);
 
         this.handleLoad = this.handleLoad.bind(this);
-        window.setValue = () => {
-            const crop = this.croppr.getValue('real');
-            this.croppr.setValue(crop, true, 'real');
-        }
         console.log("CONTRUCT");
     }
 
@@ -25,6 +21,7 @@ export default class SmartCroppr extends React.Component {
     }
 
     componentDidMount() {
+        window.dispatchEvent(new Event('resize'));
         console.log("MOUNT");
     }
 
@@ -59,6 +56,7 @@ export default class SmartCroppr extends React.Component {
     }
 
     handleLoad(ev) {
+        console.log("LOAD");
         if (typeof this.firstLoadDone === 'undefined') {
             this.firstLoadDone = true;
 
