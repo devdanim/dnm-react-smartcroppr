@@ -5214,23 +5214,15 @@ function (_React$Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(SmartCroppr$1).call(this, props));
     _this.handleLoad = _this.handleLoad.bind(_assertThisInitialized(_this));
-    _this.handleCropprInit = _this.handleCropprInit.bind(_assertThisInitialized(_this));
-    console.log("CONTRUCT");
     return _this;
   }
 
   _createClass(SmartCroppr$1, [{
     key: "componentWillUnmount",
     value: function componentWillUnmount() {
-      console.log("UNMOUNT");
-
       if (this.croppr) {
         this.croppr.destroy();
       }
-    }
-  }, {
-    key: "componentDidMount",
-    value: function componentDidMount() {//window.dispatchEvent(new Event('resize'));
     }
   }, {
     key: "componentDidUpdate",
@@ -5241,10 +5233,8 @@ function (_React$Component) {
 
       if (prevProps.src !== this.props.src) {
         if (this.props.smartCrop) {
-          console.log("UPDATE", "setImage with smartcrop");
           this.croppr.setImage(this.props.src, null, true, this.props.smartCropOptions);
         } else {
-          console.log("UPDATE", "setImage without smartcrop");
           this.croppr.setImage(this.props.src, function () {
             return _this2.croppr.setValue(crop || {
               x: 0,
@@ -5263,7 +5253,6 @@ function (_React$Component) {
         }
 
         if (updateisNeeded) {
-          console.log("UPDATE", "setValue", prevProps.crop, this.props.crop);
           this.croppr.setValue(crop || {
             x: 0,
             y: 0,
@@ -5272,21 +5261,14 @@ function (_React$Component) {
           }, true, crop ? this.props.mode : 'ratio');
         }
       }
-    }
-  }, {
-    key: "handleCropprInit",
-    value: function handleCropprInit(croppr) {
-      console.log("INIT");
-      var onInit = this.props.onInit;
-      croppr.forceRedraw();
-      window.smartcroppr = croppr;
-      if (onInit) onInit(croppr);
+
+      if (!_.isEqual(prevProps.style, this.props.style)) {
+        this.croppr.forceRedraw();
+      }
     }
   }, {
     key: "handleLoad",
     value: function handleLoad(ev) {
-      console.log("LOAD");
-
       if (typeof this.firstLoadDone === 'undefined') {
         this.firstLoadDone = true;
         var _this$props = this.props,
@@ -5298,7 +5280,8 @@ function (_React$Component) {
             smartCropOptions = _this$props.smartCropOptions,
             onCropEnd = _this$props.onCropEnd,
             onCropStart = _this$props.onCropStart,
-            onCropMove = _this$props.onCropMove;
+            onCropMove = _this$props.onCropMove,
+            onInit = _this$props.onInit;
         var startPosition = [0, 0, 'real'];
         var startSize = [1, 1, 'ratio'];
 
@@ -5323,7 +5306,7 @@ function (_React$Component) {
           onCropEnd: onCropEnd,
           onCropStart: onCropStart,
           onCropMove: onCropMove,
-          onInitialize: this.handleCropprInit
+          onInitialize: onInit
         });
       }
     }
@@ -5331,7 +5314,8 @@ function (_React$Component) {
     key: "render",
     value: function render() {
       return React.createElement("div", {
-        className: "cropper"
+        className: "cropper",
+        style: this.props.style || null
       }, React.createElement("img", {
         alt: "",
         ref: "img",
@@ -5356,7 +5340,8 @@ SmartCroppr$1.propTypes = {
   onCropStart: PropTypes.func,
   onInit: PropTypes.func,
   smartCrop: PropTypes.bool,
-  smartCropOptions: PropTypes.object
+  smartCropOptions: PropTypes.object,
+  style: PropTypes.object
 };
 SmartCroppr$1.defaultProps = {
   aspectRatio: 1,

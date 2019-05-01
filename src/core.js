@@ -8,28 +8,19 @@ const _ = { isEqual };
 export default class SmartCroppr extends React.Component {
     constructor(props) {
         super(props);
-
         this.handleLoad = this.handleLoad.bind(this);
-        this.handleCropprInit = this.handleCropprInit.bind(this);
-        console.log("CONTRUCT");
     }
 
     componentWillUnmount() {
-        console.log("UNMOUNT");
         if(this.croppr) {
             this.croppr.destroy();
         }
-    }
-
-    componentDidMount() {
-        //window.dispatchEvent(new Event('resize'));
     }
 
     componentDidUpdate(prevProps) {
         const crop = this.props.crop ? JSON.parse(JSON.stringify(this.props.crop)) : null; // JSON.parse(JSON.stringify()) to avoid method to modify ours props!
         if (prevProps.src !== this.props.src) {
             if (this.props.smartCrop) {
-                console.log("UPDATE", "setImage with smartcrop");
                 this.croppr.setImage(
                     this.props.src,
                     null,
@@ -37,7 +28,6 @@ export default class SmartCroppr extends React.Component {
                     this.props.smartCropOptions
                 );
             } else {
-                console.log("UPDATE", "setImage without smartcrop");
                 this.croppr.setImage(
                     this.props.src,
                     () => this.croppr.setValue(
@@ -55,7 +45,6 @@ export default class SmartCroppr extends React.Component {
                 if(isEqual(activeCrop, crop)) updateisNeeded = false;
             }
             if(updateisNeeded) {
-                console.log("UPDATE", "setValue", prevProps.crop, this.props.crop);
                 this.croppr.setValue(
                     crop || { x: 0, y: 0, width: 1, height: 1 }, 
                     true, 
@@ -63,18 +52,12 @@ export default class SmartCroppr extends React.Component {
                 );
             }
         }
-    }
-
-    handleCropprInit(croppr) {
-        console.log("INIT");
-        const { onInit } = this.props;
-        croppr.forceRedraw();
-        window.smartcroppr = croppr;
-        if(onInit) onInit(croppr);
+        if(!_.isEqual(prevProps.style, this.props.style)) {
+            this.croppr.forceRedraw();
+        }
     }
 
     handleLoad(ev) {
-        console.log("LOAD");
         if (typeof this.firstLoadDone === 'undefined') {
             this.firstLoadDone = true;
 
@@ -88,6 +71,7 @@ export default class SmartCroppr extends React.Component {
                 onCropEnd, 
                 onCropStart, 
                 onCropMove, 
+                onInit,
             } = this.props;
 
             let startPosition = [0, 0, 'real'];
@@ -110,14 +94,14 @@ export default class SmartCroppr extends React.Component {
                 onCropEnd,
                 onCropStart,
                 onCropMove,
-                onInitialize: this.handleCropprInit,
+                onInitialize: onInit,
             });
         }
     }
 
     render() {
         return (
-            <div className="cropper">
+            <div className="cropper" style={this.props.style || null}>
                 <img alt="" ref="img" onLoad={this.handleLoad} src={this.props.src}/>
             </div>
         );
@@ -138,6 +122,7 @@ SmartCroppr.propTypes = {
     onInit: PropTypes.func,
     smartCrop: PropTypes.bool,
     smartCropOptions: PropTypes.object,
+    style: PropTypes.object,
 };
 
 SmartCroppr.defaultProps = {
