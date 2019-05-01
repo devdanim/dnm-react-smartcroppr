@@ -41,7 +41,7 @@
     "@babel/preset-react": "^7.0.0",
     "npm-login-noninteractive": "^0.1.4",
     "onchange": "^5.2.0",
-    "dnm-smartcroppr": "^1.2.5",
+    "dnm-smartcroppr": "^1.2.6",
     "parcel-bundler": "^1.12.3",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",

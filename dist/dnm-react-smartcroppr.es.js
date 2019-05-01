@@ -673,35 +673,34 @@ class CropprCore {
 
     };
 
-
     if(this.options.responsive) {
       let onResize;
-      const resizeFunc = () => {
-        let newOptions = this.options;
-        let cropData = this.responsiveData;
-
-        const controlKeys = ["x","y","width","height"];
-        for(var i=0; i<controlKeys.length; i++) {
-          cropData[controlKeys[i]] = cropData[controlKeys[i]] > 1 ? 1 : cropData[controlKeys[i]] < 0 ? 0 : cropData[controlKeys[i]];
-        }
-
-        newOptions.startPosition = [cropData.x, cropData.y, "ratio"];
-        newOptions.startSize = [cropData.width, cropData.height, "ratio"];
-        newOptions = this.parseOptions(newOptions);
-        
-        this.showModal("onResize");
-        this.initializeBox(newOptions);
-        this.resetModal("onResize");
-        
-      };
-      window.onresize = function() {
+      window.onresize = () => {
           clearTimeout(onResize);
           onResize = setTimeout(() => {
-              resizeFunc();
+              this.forceRedraw();
           }, 100);
       };
     }
 
+  }
+
+  forceRedraw() {
+    let newOptions = this.options;
+    let cropData = this.responsiveData;
+
+    const controlKeys = ["x","y","width","height"];
+    for(var i=0; i<controlKeys.length; i++) {
+      cropData[controlKeys[i]] = cropData[controlKeys[i]] > 1 ? 1 : cropData[controlKeys[i]] < 0 ? 0 : cropData[controlKeys[i]];
+    }
+
+    newOptions.startPosition = [cropData.x, cropData.y, "ratio"];
+    newOptions.startSize = [cropData.width, cropData.height, "ratio"];
+    newOptions = this.parseOptions(newOptions);
+    
+    this.showModal("onResize");
+    this.initializeBox(newOptions);
+    this.resetModal("onResize");
   }
 
 
@@ -5255,14 +5254,30 @@ function (_React$Component) {
           }, false);
         }
       } else if (!_.isEqual(prevProps.crop, this.props.crop) || prevProps.mode !== this.props.mode) {
-        console.log("UPDATE", "setValue");
-        this.croppr.setValue(crop || {
-          x: 0,
-          y: 0,
-          width: 1,
-          height: 1
-        }, true, crop ? this.props.mode : 'ratio');
+        var updateisNeeded = true;
+
+        if (crop) {
+          var activeCrop = this.croppr.getValue(this.props.mode);
+          if (isEqual(activeCrop, crop)) updateisNeeded = false;
+        }
+
+        if (updateisNeeded) {
+          console.log("UPDATE", "setValue", prevProps.crop, this.props.crop);
+          this.croppr.setValue(crop || {
+            x: 0,
+            y: 0,
+            width: 1,
+            height: 1
+          }, true, crop ? this.props.mode : 'ratio');
+        }
       }
+    }
+  }, {
+    key: "handleCropprInit",
+    value: function handleCropprInit(croppr) {
+      var onInit = this.props.onInit;
+      croppr.forceRedraw();
+      if (onInit) onInit(croppr);
     }
   }, {
     key: "handleLoad",
@@ -5280,9 +5295,7 @@ function (_React$Component) {
             smartCropOptions = _this$props.smartCropOptions,
             onCropEnd = _this$props.onCropEnd,
             onCropStart = _this$props.onCropStart,
-            onCropMove = _this$props.onCropMove,
-            onInit = _this$props.onInit; // startPosition
-
+            onCropMove = _this$props.onCropMove;
         var startPosition = [0, 0, 'real'];
         var startSize = [1, 1, 'ratio'];
 
@@ -5307,7 +5320,7 @@ function (_React$Component) {
           onCropEnd: onCropEnd,
           onCropStart: onCropStart,
           onCropMove: onCropMove,
-          onInitialize: onInit
+          onInitialize: this.handleCropprInit
         });
       }
     }

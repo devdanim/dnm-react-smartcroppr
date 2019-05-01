@@ -48,13 +48,26 @@ export default class SmartCroppr extends React.Component {
                 );
             }
         } else if (!_.isEqual(prevProps.crop, this.props.crop) || prevProps.mode !== this.props.mode) {
-            console.log("UPDATE", "setValue");
-            this.croppr.setValue(
-                crop || { x: 0, y: 0, width: 1, height: 1 }, 
-                true, 
-                crop ? this.props.mode : 'ratio'
-            );
+            let updateisNeeded = true;
+            if(crop) {
+                const activeCrop = this.croppr.getValue(this.props.mode);
+                if(isEqual(activeCrop, crop)) updateisNeeded = false;
+            }
+            if(updateisNeeded) {
+                console.log("UPDATE", "setValue", prevProps.crop, this.props.crop);
+                this.croppr.setValue(
+                    crop || { x: 0, y: 0, width: 1, height: 1 }, 
+                    true, 
+                    crop ? this.props.mode : 'ratio'
+                );
+            }
         }
+    }
+
+    handleCropprInit(croppr) {
+        const { onInit } = this.props;
+        croppr.forceRedraw();
+        if(onInit) onInit(croppr);
     }
 
     handleLoad(ev) {
@@ -72,10 +85,8 @@ export default class SmartCroppr extends React.Component {
                 onCropEnd, 
                 onCropStart, 
                 onCropMove, 
-                onInit 
             } = this.props;
 
-            // startPosition
             let startPosition = [0, 0, 'real'];
             let startSize = [1, 1, 'ratio'];
             if (crop) {
@@ -96,7 +107,7 @@ export default class SmartCroppr extends React.Component {
                 onCropEnd,
                 onCropStart,
                 onCropMove,
-                onInitialize: onInit,
+                onInitialize: this.handleCropprInit,
             });
         }
     }
