@@ -5262,7 +5262,7 @@ function (_React$Component) {
             startPosition[2] = 'px';
             startPosition[3] = true;
           } else {
-            startPosition[2] = this.props.mode;
+            startPosition[2] = this.props.mode === "ratio" ? "%" : "px";
             startPosition[3] = false;
           }
         } // startSize
@@ -5322,7 +5322,7 @@ SmartCroppr$1.propTypes = {
   aspectRatio: PropTypes.number,
   crop: PropTypes.object,
   maxAspectRatio: PropTypes.number,
-  mode: PropTypes.string,
+  mode: PropTypes.oneOf(["ratio", "raw", "real"]),
   onCropEnd: PropTypes.func,
   onCropMove: PropTypes.func,
   onCropStart: PropTypes.func,
@@ -5334,7 +5334,7 @@ SmartCroppr$1.defaultProps = {
   aspectRatio: 1,
   crop: null,
   maxAspectRatio: null,
-  mode: 'px',
+  mode: 'real',
   onCropEnd: function onCropEnd(data) {
     return null;
   },

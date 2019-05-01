@@ -51,7 +51,7 @@ export default class SmartCroppr extends React.Component {
                     startPosition[2] = 'px';
                     startPosition[3] = true;
                 } else {
-                    startPosition[2] = this.props.mode;
+                    startPosition[2] = this.props.mode === "ratio" ? "%" : "px";
                     startPosition[3] = false;
                 }
             }
@@ -103,7 +103,7 @@ SmartCroppr.propTypes = {
     aspectRatio: PropTypes.number,
     crop: PropTypes.object,
     maxAspectRatio: PropTypes.number,
-    mode: PropTypes.string,
+    mode: PropTypes.oneOf(["ratio", "raw", "real"]),
     onCropEnd: PropTypes.func,
     onCropMove: PropTypes.func,
     onCropStart: PropTypes.func,
@@ -116,7 +116,7 @@ SmartCroppr.defaultProps = {
     aspectRatio: 1,
     crop: null,
     maxAspectRatio: null,
-    mode: 'px',
+    mode: 'real',
     onCropEnd: data => null,
     onCropMove: data => null,
     onCropStart: data => null,

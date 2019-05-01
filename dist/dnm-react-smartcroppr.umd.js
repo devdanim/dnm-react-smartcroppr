@@ -7282,7 +7282,7 @@
               startPosition[2] = 'px';
               startPosition[3] = true;
             } else {
-              startPosition[2] = this.props.mode;
+              startPosition[2] = this.props.mode === "ratio" ? "%" : "px";
               startPosition[3] = false;
             }
           } // startSize
@@ -7342,7 +7342,7 @@
     aspectRatio: PropTypes.number,
     crop: PropTypes.object,
     maxAspectRatio: PropTypes.number,
-    mode: PropTypes.string,
+    mode: PropTypes.oneOf(["ratio", "raw", "real"]),
     onCropEnd: PropTypes.func,
     onCropMove: PropTypes.func,
     onCropStart: PropTypes.func,
@@ -7354,7 +7354,7 @@
     aspectRatio: 1,
     crop: null,
     maxAspectRatio: null,
-    mode: 'px',
+    mode: 'real',
     onCropEnd: function onCropEnd(data) {
       return null;
     },
