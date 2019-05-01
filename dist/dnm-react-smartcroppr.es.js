@@ -5214,6 +5214,7 @@ function (_React$Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(SmartCroppr$1).call(this, props));
     _this.handleLoad = _this.handleLoad.bind(_assertThisInitialized(_this));
+    _this.handleCropprInit = _this.handleCropprInit.bind(_assertThisInitialized(_this));
     console.log("CONTRUCT");
     return _this;
   }

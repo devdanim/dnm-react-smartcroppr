@@ -10,6 +10,7 @@ export default class SmartCroppr extends React.Component {
         super(props);
 
         this.handleLoad = this.handleLoad.bind(this);
+        this.handleCropprInit = this.handleCropprInit.bind(this);
         console.log("CONTRUCT");
     }
 
