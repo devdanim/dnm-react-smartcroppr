@@ -5279,7 +5279,7 @@ function (_React$Component) {
       console.log("INIT");
       var onInit = this.props.onInit;
       croppr.forceRedraw();
-      window.redraw = croppr.forceRedraw;
+      window.smartcroppr = croppr;
       if (onInit) onInit(croppr);
     }
   }, {

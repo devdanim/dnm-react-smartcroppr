@@ -69,7 +69,7 @@ export default class SmartCroppr extends React.Component {
         console.log("INIT");
         const { onInit } = this.props;
         croppr.forceRedraw();
-        window.redraw = croppr.forceRedraw;
+        window.smartcroppr = croppr;
         if(onInit) onInit(croppr);
     }
 
