@@ -5278,6 +5278,7 @@ function (_React$Component) {
     value: function handleCropprInit(croppr) {
       var onInit = this.props.onInit;
       croppr.forceRedraw();
+      window.redraw = croppr.forceRedraw;
       if (onInit) onInit(croppr);
     }
   }, {
