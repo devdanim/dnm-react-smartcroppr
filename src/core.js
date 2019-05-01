@@ -14,6 +14,18 @@ export default class SmartCroppr extends React.Component {
             const crop = this.croppr.getValue('real');
             this.croppr.setValue(crop, true, 'real');
         }
+        console.log("CONTRUCT");
+    }
+
+    componentWillUnmount() {
+        console.log("UNMOUNT");
+        if(this.croppr) {
+            this.croppr.destroy();
+        }
+    }
+
+    componentDidMount() {
+        console.log("MOUNT");
     }
 
     componentDidUpdate(prevProps) {
@@ -85,7 +97,6 @@ export default class SmartCroppr extends React.Component {
                 onCropStart,
                 onCropMove,
                 onInitialize: onInit,
-                debug:true,
             });
         }
     }

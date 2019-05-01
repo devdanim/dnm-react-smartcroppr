@@ -5222,10 +5222,25 @@ function (_React$Component) {
       _this.croppr.setValue(crop, true, 'real');
     };
 
+    console.log("CONTRUCT");
     return _this;
   }
 
   _createClass(SmartCroppr$1, [{
+    key: "componentWillUnmount",
+    value: function componentWillUnmount() {
+      console.log("UNMOUNT");
+
+      if (this.croppr) {
+        this.croppr.destroy();
+      }
+    }
+  }, {
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      console.log("MOUNT");
+    }
+  }, {
     key: "componentDidUpdate",
     value: function componentDidUpdate(prevProps) {
       var _this2 = this;
@@ -5295,8 +5310,7 @@ function (_React$Component) {
           onCropEnd: onCropEnd,
           onCropStart: onCropStart,
           onCropMove: onCropMove,
-          onInitialize: onInit,
-          debug: true
+          onInitialize: onInit
         });
       }
     }
