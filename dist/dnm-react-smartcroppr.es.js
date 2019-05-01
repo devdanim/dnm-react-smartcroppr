@@ -4950,7 +4950,7 @@ class SmartCroppr extends Croppr {
 
     let defaultSmartOptions = {
       face: false,
-      facePreResize: 768,
+      preResize: 768,
       minScale: null,
       minWidth: null,
       minHeight: null,
@@ -4964,13 +4964,13 @@ class SmartCroppr extends Croppr {
 
     for(var key in defaultSmartOptions) {
       let defaultValue = defaultSmartOptions[key];
-      if(options.smartOptions && options.smartOptions[key]) {
+      if(options.smartOptions && typeof options.smartOptions[key] !== "undefined") {
         defaultValue = options.smartOptions[key];
       } 
       this.smartOptions[key] = defaultValue; 
     }
 
-    if(!this.smartOptions.face) this.smartOptions.facePreResize = null;
+    if(!options.preResize && this.smartOptions.face === false) this.smartOptions.preResize = 0;
 
     let tempMinRatio = options.aspectRatio ? options.aspectRatio : this.smartOptions.aspectRatio ? this.smartOptions.aspectRatio : null;
     let tempMaxRatio = options.maxAspectRatio ? options.maxAspectRatio : this.smartOptions.maxAspectRatio ? this.smartOptions.maxAspectRatio : null;
@@ -5042,18 +5042,19 @@ class SmartCroppr extends Croppr {
 
   setBestCrop(smartOptions, crop = true) {
 
-    const maxDimension = smartOptions.facePreResize;
+    const maxDimension = smartOptions.preResize;
 
-    let size = this.getSizeFromRatios();
+    const size = this.getSizeFromRatios();
 
-    if(size) {
+    smartOptions.minScale = size.minScale;
+    smartOptions.width = size.width;
+    smartOptions.height = size.height;
+    smartOptions.perfectRatio = size.perfectRatio;
 
-      smartOptions.minScale = size.minScale;
-      smartOptions.width = size.width;
-      smartOptions.height = size.height;
-      smartOptions.perfectRatio = size.perfectRatio;
-      
-
+    if(!smartOptions.width || !smartOptions.height) {
+      smartOptions.skipSmartCrop = true;
+      this.launchSmartCrop(this.imageEl, smartOptions);
+    } else {
       //Function used in testbed of smartcrop.js repo, because tracking.js is very slow with big images
       const scaleImage = (img, maxDimension, callback) => {
           var width = img.naturalWidth || img.width;
@@ -5075,20 +5076,13 @@ class SmartCroppr extends Croppr {
         if(this.debug) console.log("debug - IMAGE IS SCALED : ", scale);
         this.launchSmartCrop(new_img, smartOptions, scale, crop);
       };
-
+  
       var img = new Image();
       img.crossOrigin = 'anonymous';
       img.src = this.imageEl.src; 
       img.onload = function() {
-
         scaleImage(img, maxDimension, scaleImageCallback);
-
       };
-
-    } else {
-
-      setSmartCrop();
-
     }
 
   }
@@ -5130,7 +5124,7 @@ class SmartCroppr extends Croppr {
         if(options.onSmartCropDone) options.onSmartCropDone(cloned_data);
       };
 
-      if(options.minScale === 1 && options.perfectRatio) {
+      if(options.skipSmartCrop || (options.minScale === 1 && options.perfectRatio) ) {
         cropCallback(null);
       } else {
         smartcrop.crop(img, options).then( result => {
