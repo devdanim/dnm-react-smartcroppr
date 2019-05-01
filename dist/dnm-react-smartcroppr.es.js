@@ -673,36 +673,34 @@ class CropprCore {
 
     };
 
-
     if(this.options.responsive) {
       let onResize;
-      const resizeFunc = () => {
-        let newOptions = this.options;
-        let cropData = this.responsiveData;
-
-        const controlKeys = ["x","y","width","height"];
-        for(var i=0; i<controlKeys.length; i++) {
-          cropData[controlKeys[i]] *= 100;
-          cropData[controlKeys[i]] = cropData[controlKeys[i]] > 100 ? 100 : cropData[controlKeys[i]] < 0 ? 0 : cropData[controlKeys[i]];
-        }
-
-        newOptions.startPosition = [cropData.x, cropData.y, "%"];
-        newOptions.startSize = [cropData.width, cropData.height, "%"];
-        newOptions = this.parseOptions(newOptions);
-        
-        this.showModal("onResize");
-        this.initializeBox(newOptions);
-        this.resetModal("onResize");
-        
-      };
-      window.onresize = function() {
+      window.onresize = () => {
           clearTimeout(onResize);
           onResize = setTimeout(() => {
-              resizeFunc();
+              this.forceRedraw();
           }, 100);
       };
     }
 
+  }
+
+  forceRedraw() {
+    let newOptions = this.options;
+    let cropData = this.responsiveData;
+
+    const controlKeys = ["x","y","width","height"];
+    for(var i=0; i<controlKeys.length; i++) {
+      cropData[controlKeys[i]] = cropData[controlKeys[i]] > 1 ? 1 : cropData[controlKeys[i]] < 0 ? 0 : cropData[controlKeys[i]];
+    }
+
+    newOptions.startPosition = [cropData.x, cropData.y, "ratio"];
+    newOptions.startSize = [cropData.width, cropData.height, "ratio"];
+    newOptions = this.parseOptions(newOptions);
+    
+    this.showModal("onResize");
+    this.initializeBox(newOptions);
+    this.resetModal("onResize");
   }
 
 
@@ -1055,23 +1053,23 @@ class CropprCore {
       const { width, height } = this.imageEl.getBoundingClientRect();
       this.resetModal();
       if (data.width) {
-        data.width = (data.width / 100) * width;
+        data.width *= width;
       } 
       if (data.x) {
-        data.x = (data.x / 100) * width;
+        data.x *= width;
       }
 
       if (data.height) {
-        data.height = (data.height / 100) * height;
+        data.height *= height;
       } 
       if (data.y) {
-        data.y = (data.y / 100) * height;
+        data.y *= height;
       } 
       return data;
     };
-    if(inputMode === "real" && outputMode === "px") {
+    if(inputMode === "real" && outputMode === "raw") {
       return convertRealDataToPixel(data)
-    } else if(inputMode === "%" && outputMode === "px") {
+    } else if(inputMode === "ratio" && outputMode === "raw") {
       return convertPercentToPixel(data)
     }
     return null
@@ -1089,10 +1087,10 @@ class CropprCore {
     for (let i = 0; i < sizeKeys.length; i++) {
       const key = sizeKeys[i];
       if (opts[key] !== null) {
-        if (opts[key].unit == '%') {
-          opts[key] = this.convertor(opts[key], "%", "px");
-        } else if(opts[key].real === true) {
-          opts[key] = this.convertor(opts[key], "real", "px");
+        if (opts[key].unit == 'ratio') {
+          opts[key] = this.convertor(opts[key], "ratio", "raw");
+        } else if(opts[key].unit === 'real') {
+          opts[key] = this.convertor(opts[key], "real", "raw");
         }
         delete opts[key].unit;
       }
@@ -1550,9 +1548,9 @@ class CropprCore {
     const defaults = {
       aspectRatio: null,
       maxAspectRatio: null,
-      maxSize: { width: null, height: null, unit: 'px', real: false },
-      minSize: { width: null, height: null, unit: 'px', real: false },
-      startSize: { width: 100, height: 100, unit: '%', real: false },
+      maxSize: { width: null, height: null, unit: 'raw' },
+      minSize: { width: null, height: null, unit: 'raw' },
+      startSize: { width: 1, height: 1, unit: 'ratio' },
       startPosition: null,
       returnMode: 'real',
       onInitialize: null,
@@ -1601,8 +1599,7 @@ class CropprCore {
       maxSize = {
         width: opts.maxSize[0] || null,
         height: opts.maxSize[1] || null,
-        unit: opts.maxSize[2] || 'px',
-        real: opts.minSize[3] || false
+        unit: opts.maxSize[2] || 'raw'
       };
     }
 
@@ -1612,8 +1609,7 @@ class CropprCore {
       minSize = {
         width: opts.minSize[0] || null,
         height: opts.minSize[1] || null,
-        unit: opts.minSize[2] || 'px',
-        real: opts.minSize[3] || false
+        unit: opts.minSize[2] || 'raw'
       };
     }
 
@@ -1623,8 +1619,7 @@ class CropprCore {
       startSize = {
         width: opts.startSize[0] || null,
         height: opts.startSize[1] || null,
-        unit: opts.startSize[2] || '%',
-        real: opts.startSize[3] || false
+        unit: opts.startSize[2] || 'ratio'
       };
     }
 
@@ -1634,8 +1629,7 @@ class CropprCore {
       startPosition = {
         x: opts.startPosition[0] || null,
         y: opts.startPosition[1] || null,
-        unit: opts.startPosition[2] || '%',
-        real: opts.startPosition[3] || false
+        unit: opts.startPosition[2] || 'ratio'
       };
     }
 
@@ -1753,12 +1747,12 @@ class Croppr extends CropprCore {
    * @param {Number} x
    * @param {Number} y
    */
-  moveTo(x, y, constrain = true, mode = "px") {
+  moveTo(x, y, constrain = true, mode = "raw") {
 
     this.showModal("moveTo");
 
-    if(mode === "%" || mode === "real") {
-      let data = this.convertor( {x, y} , mode, "px");
+    if(mode === "ratio" || mode === "real") {
+      let data = this.convertor( {x, y} , mode, "raw");
       x = data.x;
       y = data.y;
     }
@@ -1784,16 +1778,16 @@ class Croppr extends CropprCore {
    * @param {Array} origin The origin point to resize from.
    *      Defaults to [0.5, 0.5] (center).
    */
-  resizeTo(width, height, origin = null, constrain = true, mode = "px") {
+  resizeTo(width, height, origin = null, constrain = true, mode = "raw") {
 
     this.showModal("resize");
 
-    if(mode === "%" || mode === "real") {
+    if(mode === "ratio" || mode === "real") {
       let data = {
         width: width,
         height: height
       };
-      data = this.convertor( data, mode, "px");
+      data = this.convertor( data, mode, "raw");
       width = data.width;
       height = data.height;
     }
@@ -1814,12 +1808,12 @@ class Croppr extends CropprCore {
     return this;
   }
 
-  setValue(data, constrain = true, mode = "%") {
+  setValue(data, constrain = true, mode = "ratio") {
 
     this.showModal("setValue");
 
-    if(mode === "%" || mode === "real") {
-      data = this.convertor(data, mode, "px");
+    if(mode === "ratio" || mode === "real") {
+      data = this.convertor(data, mode, "raw");
     }
 
     this.moveTo(data.x, data.y, false);
@@ -5111,7 +5105,7 @@ class SmartCroppr extends Croppr {
       if(!data) data = null;
       this.smartCropData = null;
       if(data && crop === true) {
-        this.setValue(data, false, "real");
+        this.setValue(data, true, "real");
       }
     };
 
@@ -5131,8 +5125,9 @@ class SmartCroppr extends Croppr {
       }
 
       const cropCallback = data => {
+        const cloned_data = JSON.parse(JSON.stringify(data));
         setSmartCrop(data);
-        if(options.onSmartCropDone) options.onSmartCropDone(data);
+        if(options.onSmartCropDone) options.onSmartCropDone(cloned_data);
       };
 
       if(options.minScale === 1 && options.perfectRatio) {
@@ -5141,7 +5136,7 @@ class SmartCroppr extends Croppr {
         smartcrop.crop(img, options).then( result => {
           if(this.debug) console.log("debug - RAW DATA : ", result.topCrop);
           let smartCropData = convertValuesWithScale(result.topCrop, scale);
-          if(this.debug) console.log("debug - CONVERT DATA : ", smartCropData);
+          if(this.debug) console.log("debug - CONVERTED DATA : ", smartCropData);
           cropCallback(smartCropData);
         });
       }
@@ -5223,6 +5218,13 @@ function (_React$Component) {
   }
 
   _createClass(SmartCroppr$1, [{
+    key: "componentWillUnmount",
+    value: function componentWillUnmount() {
+      if (this.croppr) {
+        this.croppr.destroy();
+      }
+    }
+  }, {
     key: "componentDidUpdate",
     value: function componentDidUpdate(prevProps) {
       var _this2 = this;
@@ -5237,65 +5239,74 @@ function (_React$Component) {
             return _this2.croppr.setValue(crop || {
               x: 0,
               y: 0,
-              width: 100,
-              height: 100
-            }, true, _this2.props.mode || '%');
+              width: 1,
+              height: 1
+            }, true, crop ? _this2.props.mode : 'ratio');
           }, false);
         }
       } else if (!_.isEqual(prevProps.crop, this.props.crop) || prevProps.mode !== this.props.mode) {
-        this.croppr.setValue(crop, true, this.props.mode);
+        var updateisNeeded = true;
+
+        if (crop) {
+          var activeCrop = this.croppr.getValue(this.props.mode);
+          if (isEqual(activeCrop, crop)) updateisNeeded = false;
+        }
+
+        if (updateisNeeded) {
+          this.croppr.setValue(crop || {
+            x: 0,
+            y: 0,
+            width: 1,
+            height: 1
+          }, true, crop ? this.props.mode : 'ratio');
+        }
+      }
+
+      if (!_.isEqual(prevProps.style, this.props.style)) {
+        this.croppr.forceRedraw();
       }
     }
   }, {
     key: "handleLoad",
     value: function handleLoad(ev) {
       if (typeof this.firstLoadDone === 'undefined') {
-        this.firstLoadDone = true; // startPosition
+        this.firstLoadDone = true;
+        var _this$props = this.props,
+            smartCrop = _this$props.smartCrop,
+            crop = _this$props.crop,
+            mode = _this$props.mode,
+            aspectRatio = _this$props.aspectRatio,
+            maxAspectRatio = _this$props.maxAspectRatio,
+            smartCropOptions = _this$props.smartCropOptions,
+            onCropEnd = _this$props.onCropEnd,
+            onCropStart = _this$props.onCropStart,
+            onCropMove = _this$props.onCropMove,
+            onInit = _this$props.onInit;
+        var startPosition = [0, 0, 'real'];
+        var startSize = [1, 1, 'ratio'];
 
-        var startPosition = [0, 0, 'px', false];
-
-        if (this.props.crop) {
-          startPosition[0] = this.props.crop.x;
-          startPosition[1] = this.props.crop.y;
-
-          if (this.props.mode === 'real') {
-            startPosition[2] = 'px';
-            startPosition[3] = true;
-          } else {
-            startPosition[2] = this.props.mode;
-            startPosition[3] = false;
-          }
-        } // startSize
-
-
-        var startSize = [100, 100, '%', false];
-
-        if (this.props.crop) {
-          startSize[0] = this.props.crop.width;
-          startSize[1] = this.props.crop.height;
-
-          if (this.props.mode === 'real') {
-            startSize[2] = 'px';
-            startSize[3] = true;
-          } else {
-            startSize[2] = this.props.mode;
-            startSize[3] = false;
-          }
+        if (crop) {
+          var x = crop.x,
+              y = crop.y,
+              width = crop.width,
+              height = crop.height;
+          startPosition = [x, y, crop.mode || mode];
+          startSize = [width, height, crop.mode || mode];
         }
 
         this.croppr = new SmartCroppr(this.refs.img, {
-          returnMode: this.props.mode,
+          returnMode: mode,
           responsive: true,
-          aspectRatio: this.props.aspectRatio,
-          maxAspectRatio: this.props.maxAspectRatio,
-          smartcrop: this.props.crop ? false : this.props.smartCrop,
-          smartOptions: this.props.smartCropOptions,
+          aspectRatio: aspectRatio,
+          maxAspectRatio: maxAspectRatio,
+          smartcrop: crop ? false : smartCrop,
+          smartOptions: smartCropOptions,
           startPosition: startPosition,
           startSize: startSize,
-          onCropEnd: this.props.onCropEnd,
-          onCropStart: this.props.onCropStart,
-          onCropMove: this.props.onCropMove,
-          onInitialize: this.props.onInit
+          onCropEnd: onCropEnd,
+          onCropStart: onCropStart,
+          onCropMove: onCropMove,
+          onInitialize: onInit
         });
       }
     }
@@ -5303,7 +5314,8 @@ function (_React$Component) {
     key: "render",
     value: function render() {
       return React.createElement("div", {
-        className: "cropper"
+        className: "cropper",
+        style: this.props.style || null
       }, React.createElement("img", {
         alt: "",
         ref: "img",
@@ -5322,19 +5334,20 @@ SmartCroppr$1.propTypes = {
   aspectRatio: PropTypes.number,
   crop: PropTypes.object,
   maxAspectRatio: PropTypes.number,
-  mode: PropTypes.string,
+  mode: PropTypes.oneOf(["ratio", "raw", "real"]),
   onCropEnd: PropTypes.func,
   onCropMove: PropTypes.func,
   onCropStart: PropTypes.func,
   onInit: PropTypes.func,
   smartCrop: PropTypes.bool,
-  smartCropOptions: PropTypes.object
+  smartCropOptions: PropTypes.object,
+  style: PropTypes.object
 };
 SmartCroppr$1.defaultProps = {
   aspectRatio: 1,
   crop: null,
   maxAspectRatio: null,
-  mode: 'px',
+  mode: 'real',
   onCropEnd: function onCropEnd(data) {
     return null;
   },
