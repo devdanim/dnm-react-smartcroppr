@@ -76,7 +76,7 @@ export default class SmartCroppr extends React.Component {
                 startSize = [width, height, crop.mode || mode];
             }
 
-            this.croppr = new BaseSmartCroppr(this.refs.img, {
+            this.croppr = new BaseSmartCroppr(this.img, {
                 returnMode: mode,
                 responsive: true,
                 aspectRatio,
@@ -96,7 +96,7 @@ export default class SmartCroppr extends React.Component {
     render() {
         return (
             <div className="cropper" style={this.props.style || null}>
-                <img alt="" ref="img" onLoad={this.handleLoad} src={this.props.src}/>
+                <img alt="" {obj => this.img = obj} onLoad={this.handleLoad} src={this.props.src}/>
             </div>
         );
     }
