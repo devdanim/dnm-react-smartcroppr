@@ -7300,7 +7300,7 @@
             startSize = [width, height, crop.mode || mode];
           }
 
-          this.croppr = new SmartCroppr(this.refs.img, {
+          this.croppr = new SmartCroppr(this.img, {
             returnMode: mode,
             responsive: true,
             aspectRatio: aspectRatio,
@@ -7319,12 +7319,16 @@
     }, {
       key: "render",
       value: function render() {
+        var _this3 = this;
+
         return React.createElement("div", {
           className: "cropper",
           style: this.props.style || null
         }, React.createElement("img", {
           alt: "",
-          ref: "img",
+          ref: function ref(obj) {
+            return _this3.img = obj;
+          },
           onLoad: this.handleLoad,
           src: this.props.src
         }));
