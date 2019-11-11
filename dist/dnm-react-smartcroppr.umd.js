@@ -7315,6 +7315,8 @@
             onInitialize: onInit
           });
         }
+
+        this.props.onImageLoad();
       }
     }, {
       key: "render",
@@ -7348,6 +7350,7 @@
     onCropEnd: PropTypes.func,
     onCropMove: PropTypes.func,
     onCropStart: PropTypes.func,
+    onImageLoad: PropTypes.func,
     onInit: PropTypes.func,
     smartCrop: PropTypes.bool,
     smartCropOptions: PropTypes.object,
@@ -7365,6 +7368,9 @@
       return null;
     },
     onCropStart: function onCropStart(data) {
+      return null;
+    },
+    onImageLoad: function onImageLoad() {
       return null;
     },
     onInit: function onInit(instance) {

@@ -5295,6 +5295,8 @@ function (_React$Component) {
           onInitialize: onInit
         });
       }
+
+      this.props.onImageLoad();
     }
   }, {
     key: "render",
@@ -5328,6 +5330,7 @@ SmartCroppr$1.propTypes = {
   onCropEnd: PropTypes.func,
   onCropMove: PropTypes.func,
   onCropStart: PropTypes.func,
+  onImageLoad: PropTypes.func,
   onInit: PropTypes.func,
   smartCrop: PropTypes.bool,
   smartCropOptions: PropTypes.object,
@@ -5345,6 +5348,9 @@ SmartCroppr$1.defaultProps = {
     return null;
   },
   onCropStart: function onCropStart(data) {
+    return null;
+  },
+  onImageLoad: function onImageLoad() {
     return null;
   },
   onInit: function onInit(instance) {

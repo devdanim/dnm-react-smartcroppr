@@ -91,6 +91,8 @@ export default class SmartCroppr extends React.Component {
                 onInitialize: onInit,
             });
         }
+
+        this.props.onImageLoad();
     }
 
     render() {
@@ -113,6 +115,7 @@ SmartCroppr.propTypes = {
     onCropEnd: PropTypes.func,
     onCropMove: PropTypes.func,
     onCropStart: PropTypes.func,
+    onImageLoad: PropTypes.func,
     onInit: PropTypes.func,
     smartCrop: PropTypes.bool,
     smartCropOptions: PropTypes.object,
@@ -127,6 +130,7 @@ SmartCroppr.defaultProps = {
     onCropEnd: data => null,
     onCropMove: data => null,
     onCropStart: data => null,
+    onImageLoad: () => null,
     onInit: instance => null,
     smartCrop: true,
     smartCropOptions: null,
