@@ -1323,8 +1323,30 @@
       // Create image element
       this.imageEl = document.createElement('img');
       this.imageEl.setAttribute('crossOrigin', 'anonymous');
-      this.imageEl.setAttribute('src', targetEl.getAttribute('src'));
       this.imageEl.setAttribute('alt', targetEl.getAttribute('alt'));
+      // Add onload listener to reinitialize box
+      this.imageEl.onload = () => {
+        this.getSourceSize();
+        this.options = this.parseOptions(this.initOptions);
+        this.showModal("setImage");
+        this.initializeBox(null, false);
+        //Temporary FIX, see initialize()
+        this.strictlyConstrain();
+        this.redraw();
+        this.resetModal("setImage");
+        if (this.options.onCropEnd !== null) {
+          this.options.onCropEnd(this.getValue());
+        }
+        const fac = new FastAverageColor();
+        const color = fac.getColor(this.imageEl);
+        if (color) {
+          this.isDark = color.isDark;
+          if(this.isDark) this.cropperEl.className = "croppr croppr-dark";
+          else this.cropperEl.className = "croppr croppr-light";
+        }
+        if(this.onImageLoad) this.onImageLoad();
+      };
+      this.imageEl.setAttribute('src', targetEl.getAttribute('src'));
 
       this.imageEl.className = 'croppr-image';
 
@@ -1456,31 +1478,8 @@
      * @param {String} src
      */
     setImage(src, callback) {
-      // Add onload listener to reinitialize box
-      this.imageEl.onload = () => {
-        const fac = new FastAverageColor();
-        const color = fac.getColor(this.imageEl);
-        if (color) {
-          this.isDark = color.isDark;
-          if(this.isDark) this.cropperEl.className = "croppr croppr-dark";
-          else this.cropperEl.className = "croppr croppr-light";
-        }
-
-        this.getSourceSize();
-        this.options = this.parseOptions(this.initOptions);
-        this.showModal("setImage");
-        this.initializeBox(null, false);
-        //Temporary FIX, see initialize()
-        this.strictlyConstrain();
-        this.redraw();
-        this.resetModal("setImage");
-        if (this.options.onCropEnd !== null) {
-          this.options.onCropEnd(this.getValue());
-        }
-        if(callback) callback();
-      };
-
       // Change image source
+      this.onImageLoad = callback;
       this.imageEl.src = src;
       this.imageClippedEl.src = src;
       return this;
@@ -7926,6 +7925,7 @@
           ref: function ref(obj) {
             return _this3.img = obj;
           },
+          crossOrigin: "anonymous",
           onLoad: this.handleLoad,
           src: this.props.src
         }));
