@@ -5855,13 +5855,20 @@ function (_React$Component) {
             smartCrop = _this$props.smartCrop,
             crop = _this$props.crop,
             mode = _this$props.mode,
-            aspectRatio = _this$props.aspectRatio,
-            maxAspectRatio = _this$props.maxAspectRatio,
             smartCropOptions = _this$props.smartCropOptions,
             onCropEnd = _this$props.onCropEnd,
             onCropStart = _this$props.onCropStart,
             onCropMove = _this$props.onCropMove,
             onInit = _this$props.onInit;
+        var _this$props2 = this.props,
+            aspectRatio = _this$props2.aspectRatio,
+            maxAspectRatio = _this$props2.maxAspectRatio;
+
+        if (!aspectRatio && !maxAspectRatio) {
+          aspectRatio = -Infinity;
+          maxAspectRatio = Infinity;
+        }
+
         var startPosition = [0, 0, 'real'];
         var startSize = [1, 1, 'ratio'];
 
@@ -5932,9 +5939,9 @@ SmartCroppr$1.propTypes = {
   style: PropTypes.object
 };
 SmartCroppr$1.defaultProps = {
-  aspectRatio: 1,
-  crop: null,
+  aspectRatio: null,
   maxAspectRatio: null,
+  crop: null,
   mode: 'real',
   onCropEnd: function onCropEnd(data) {
     return null;
