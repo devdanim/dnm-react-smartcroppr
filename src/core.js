@@ -102,7 +102,13 @@ export default class SmartCroppr extends React.Component {
     render() {
         return (
             <div className="cropper" style={this.props.style || null}>
-                <img alt="" ref={obj => this.img = obj} crossOrigin="anonymous" onLoad={this.handleLoad} src={this.props.src}/>
+                <img
+                    alt=""
+                    ref={obj => this.img = obj}
+                    crossOrigin="anonymous"
+                    onLoad={this.handleLoad}
+                    src={this.props.src}
+                />
             </div>
         );
     }
