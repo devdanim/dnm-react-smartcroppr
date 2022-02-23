@@ -5534,8 +5534,13 @@
 
         element = this.getElement(element);
         if (element.width === 0 || element.height === 0) {
-          element.onload = () => { this.initialize(element); };
+          console.log("EL SIZE on init", element.width, element.height);
+          element.onload = () => { 
+            console.log("REINIT EL");
+            this.initialize(element); 
+          };
         } else {
+          console.log("INIT EL");
           this.initialize(element);
         }
               
@@ -5640,12 +5645,14 @@
       const maxDimension = smartOptions.preResize;
 
       const size = this.getSizeFromRatios();
+      console.log("SIZE", size, this.sourceSize);
 
       smartOptions.minScale = size.minScale;
       smartOptions.width = size.width;
       smartOptions.height = size.height;
       smartOptions.perfectRatio = size.perfectRatio;
 
+      console.log("SMART OPTIONS", smartOptions);
       if(!smartOptions.width || !smartOptions.height) {
         smartOptions.skipSmartCrop = true;
         this.launchSmartCrop(this.imageEl, smartOptions);
