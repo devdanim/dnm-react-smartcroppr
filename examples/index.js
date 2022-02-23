@@ -18,7 +18,6 @@ render(
           minWidth: 200,
           minHeight: 200,
           minScaleTreshold: 0.7,
-          face: true,
           onSmartCropDone: (data) => {
             console.log("Smartcrop", data)
           }
