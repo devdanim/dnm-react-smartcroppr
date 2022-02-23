@@ -3271,6 +3271,8 @@
       canvas.width = width;
       canvas.height = height;
 
+      console.log("Canvas2", width, height, element);
+
       var task = new tracking.TrackerTask(tracker);
       task.on('run', function() {
         tracking.Canvas.loadImage(canvas, element.src, 0, 0, width, height, function() {
@@ -5652,6 +5654,7 @@
         const scaleImage = (img, maxDimension, callback) => {
             var width = img.naturalWidth || img.width;
             var height = img.naturalHeight || img.height;
+            console.log("Img", width, height, img);
             if (!maxDimension || (width < maxDimension && height < maxDimension) ) return callback(img, 1);
             var scale = Math.min(maxDimension / width, maxDimension / height);
             var canvas = document.createElement('canvas');
@@ -5659,7 +5662,9 @@
             canvas.height = ~~(height * scale);
             canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
             var result = document.createElement('img');
+            result.crossOrigin = 'anonymous';
             result.onload = function() {
+              console.log("Canvas1", canvas.width, canvas.height, canvas);
               callback(result, scale);
             };
             result.src = canvas.toDataURL();
@@ -5672,10 +5677,10 @@
     
         var img = new Image();
         img.crossOrigin = 'anonymous';
-        img.src = this.imageEl.src; 
         img.onload = function() {
           scaleImage(img, maxDimension, scaleImageCallback);
         };
+        img.src = this.imageEl.src; 
       }
 
     }
