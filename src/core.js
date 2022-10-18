@@ -19,13 +19,13 @@ export default class SmartCroppr extends React.Component {
     componentDidUpdate(prevProps) {
         const crop = this.props.crop ? JSON.parse(JSON.stringify(this.props.crop)) : null; // JSON.parse(JSON.stringify()) to avoid method to modify ours props!
         if (prevProps.src !== this.props.src) {
-            if (this.props.smartCrop) this.croppr.setImage(
+            if (this.props.smartCrop) this.croppr && this.croppr.setImage(
                 this.props.src,
                 null,
                 true,
                 this.props.smartCropOptions
             );
-            else this.croppr.setImage(
+            else this.croppr && this.croppr.setImage(
                 this.props.src,
                 () => this.croppr.setValue(
                     crop || {x: 0, y: 0, width: 1, height: 1},
@@ -36,11 +36,11 @@ export default class SmartCroppr extends React.Component {
             );
         } else if (!_.isEqual(prevProps.crop, this.props.crop) || prevProps.mode !== this.props.mode) {
             let updateIsNeeded = true;
-            if (crop) {
+            if (crop && this.croppr) {
                 const activeCrop = this.croppr.getValue(this.props.mode);
                 if (isEqual(activeCrop, crop)) updateIsNeeded = false;
             }
-            if (updateIsNeeded) {
+            if (updateIsNeeded && this.croppr) {
                 this.croppr.setValue(
                     crop || {x: 0, y: 0, width: 1, height: 1},
                     true,
@@ -48,7 +48,7 @@ export default class SmartCroppr extends React.Component {
                 );
             }
         }
-        if (!_.isEqual(prevProps.style, this.props.style)) this.croppr.forceRedraw();
+        if (!_.isEqual(prevProps.style, this.props.style) && this.croppr) this.croppr.forceRedraw();
     }
 
     handleLoad(ev) {
