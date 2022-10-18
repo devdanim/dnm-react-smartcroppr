@@ -5224,7 +5224,7 @@ function (_React$Component) {
       var crop = this.props.crop ? JSON.parse(JSON.stringify(this.props.crop)) : null; // JSON.parse(JSON.stringify()) to avoid method to modify ours props!
 
       if (prevProps.src !== this.props.src) {
-        if (this.props.smartCrop) this.croppr && this.croppr.setImage(this.props.src, null, true, this.props.smartCropOptions);else this.croppr && this.croppr.setImage(this.props.src, function () {
+        if (this.props.smartCrop) this.croppr.setImage(this.props.src, null, true, this.props.smartCropOptions);else this.croppr.setImage(this.props.src, function () {
           return _this2.croppr.setValue(crop || {
             x: 0,
             y: 0,
@@ -5235,12 +5235,12 @@ function (_React$Component) {
       } else if (!_.isEqual(prevProps.crop, this.props.crop) || prevProps.mode !== this.props.mode) {
         var updateIsNeeded = true;
 
-        if (crop && this.croppr) {
+        if (crop) {
           var activeCrop = this.croppr.getValue(this.props.mode);
           if (isEqual(activeCrop, crop)) updateIsNeeded = false;
         }
 
-        if (updateIsNeeded && this.croppr) {
+        if (updateIsNeeded) {
           this.croppr.setValue(crop || {
             x: 0,
             y: 0,
@@ -5250,7 +5250,7 @@ function (_React$Component) {
         }
       }
 
-      if (!_.isEqual(prevProps.style, this.props.style) && this.croppr) this.croppr.forceRedraw();
+      if (!_.isEqual(prevProps.style, this.props.style)) this.croppr.forceRedraw();
     }
   }, {
     key: "handleLoad",
