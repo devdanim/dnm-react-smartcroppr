@@ -59,6 +59,7 @@ class Example extends React.Component {
               onInit={(instance, mediaNode) => {
                 console.log('onInit', instance, mediaNode);
               }}
+              onNotSupportedVideoLoad={error => console.log('onNotSupportedVideoLoad', error)}
               smartCrop={true}
               smartCropOptions={{
                 minWidth: 100,

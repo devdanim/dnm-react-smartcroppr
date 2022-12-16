@@ -1226,17 +1226,7 @@ class CropprCore {
       this._restore.parentPreview = this.options.preview.parentNode;
     }
     
-    // Wait until image is loaded before proceeding
-    if (!deferred) {
-      const mediaType = element.nodeName.toLowerCase() === 'video' ? 'video' : 'image';
-      if (mediaType === 'image' && (element.width === 0 || element.height === 0)) {
-        element.onload = () => this.initialize(element);
-      } else if (mediaType === 'video' && (element.videoWidth === 0 || element.videoHeight === 0)) {
-        element.onloadeddata = () => this.initialize(element);
-      } else {
-        this.initialize(element);
-      }
-    }
+    if (!deferred) this.initialize(element);
   }
 
   /**
@@ -1351,9 +1341,25 @@ class CropprCore {
     // Create image element
     this.mediaType = targetEl.nodeName.toLowerCase() === 'video' ? 'video' : 'image';
     this.mediaEl = document.createElement(this.mediaType === 'video' ? 'video' : 'img');
-    if (this.mediaType === 'video') ['muted', 'loop'].forEach(attr => this.mediaEl.setAttribute(attr, true));
+    if (this.mediaType === 'video') ['loop', ...(this.options.muteVideo ? ['muted'] : [])].forEach(attr => this.mediaEl.setAttribute(attr, true));
     else this.mediaEl.setAttribute('alt', targetEl.getAttribute('alt'));
     this.mediaEl.setAttribute('crossOrigin', 'anonymous');
+    
+    // Detect if video is not supported by web browser
+    if (this.mediaType === 'video') {
+      this.mediaEl.onerror = (event) => {
+        const { error } = event.target;
+        if (error && error.code === 4) {
+            if (this.options.onNotSupportedVideoLoad) this.options.onNotSupportedVideoLoad(error.message);
+        }
+      };
+      this.mediaEl.onloadedmetadata = (event) => {
+        const { videoHeight } = event.target;
+        if (videoHeight === 0) {
+          if (this.options.onNotSupportedVideoLoad) this.options.onNotSupportedVideoLoad('Video format is not supported');
+        }
+      };
+    }
 
     // Add onload listener to reinitialize box
     this.mediaEl[this.mediaType === 'image' ? 'onload' : 'onloadeddata'] = () => {
@@ -1432,14 +1438,7 @@ class CropprCore {
     const eventsToListen = ['play', 'pause', 'timeupdate', 'seeking'];
     const videoRefEventsHandlers = eventsToListen.map(event => {
       return () => {
-        if (event === "timeupdate") {
-          if (!this.videoRef || !this.videoRef.paused) {
-            return;
-          }
-          this.videosToSync.forEach(videoToSync => {
-            videoToSync.emit("timeupdate");
-          });
-        } else if (event === "seeking") {
+        if (event === "seeking") {
           this.videosToSync.forEach(videoToSync => {
             videoToSync.currentTime = this.videoRef.currentTime;
           });
@@ -1458,6 +1457,22 @@ class CropprCore {
       videoRefEventsHandlers.forEach((evenHandler, eventIndex) => {
         this.videoRef.addEventListener(eventsToListen[eventIndex], evenHandler);
       });
+      const sync = () => {
+        this.videosToSync.forEach(videoToSync => {
+          if (videoToSync.readyState === 4) {
+            // Do not resync if videos are already in sync
+            if (Math.abs(this.videoRef.currentTime - videoToSync.currentTime) > 0.1){
+              videoToSync.currentTime = this.videoRef.currentTime;
+            }
+          }
+        });
+        if (this.videoRef && this.videosToSync.length) requestAnimationFrame(sync);
+      };
+      sync();
+
+      this.videosToSync.forEach(videoToSync => videoToSync.muted = true);
+      if (this.options.muteVideo) this.videoRef.muted = true;
+
       this.stopVideosSyncing = () => {
         this.videosToSync = [];
         videoRefEventsHandlers.forEach((evenHandler, eventIndex) => {
@@ -1467,8 +1482,7 @@ class CropprCore {
         this.stopVideosSyncing = null;
       };
       const autoPlay = () => {
-        if (this.videoRef && this.videoRef.paused) {
-          this.videoRef.muted = true;
+        if (this.options.autoPlayVideo && this.videoRef && this.videoRef.paused) {
           this.videoRef.play();
           setTimeout(() => autoPlay(), 1000);
         }
@@ -1688,7 +1702,7 @@ class CropprCore {
       let newMedia = document.createElement(this.mediaType === 'video' ? 'video' : 'img');
       newMedia.src = this.mediaEl.src;
       if (this.mediaType === 'video') {
-        ['muted', 'loop'].forEach(attr => newMedia.setAttribute(attr, true));
+        ['loop', 'muted'].forEach(attr => newMedia.setAttribute(attr, true));
         newMedia.setAttribute('crossOrigin', 'anonymous');
       }
 
@@ -2289,9 +2303,11 @@ class CropprCore {
     if(opts === null) opts = this.options;
     const defaults = {
       aspectRatio: null,
+      autoPlayVideo: false,
       maxAspectRatio: null,
       maxSize: { width: null, height: null, unit: 'raw' },
       minSize: { width: null, height: null, unit: 'raw' },
+      muteVideo: false,
       startSize: { width: 1, height: 1, unit: 'ratio' },
       startPosition: null,
       returnMode: 'real',
@@ -2299,6 +2315,7 @@ class CropprCore {
       onCropStart: null,
       onCropMove: null,
       onCropEnd: null,
+      onNotSupportedVideoLoad: null,
       preview: null,
       responsive: true,
       modal: null
@@ -2311,10 +2328,6 @@ class CropprCore {
     //Parse preview
     let modal = null;
     if(opts.modal !== null) modal = this.getElement(opts.modal);
-
-    //Parse responsive
-    let responsive = null;
-    if(opts.responsive !== null) responsive = opts.responsive;
 
     // Parse aspect ratio
     let aspectRatio = null;
@@ -2401,6 +2414,11 @@ class CropprCore {
     if (typeof opts.onCropMove === 'function') {
       onCropMove = opts.onCropMove;
     }
+    
+    let onNotSupportedVideoLoad = null;
+    if (typeof opts.onNotSupportedVideoLoad === 'function') {
+      onNotSupportedVideoLoad = opts.onNotSupportedVideoLoad;
+    }
 
     // Parse returnMode value
     let returnMode = null;
@@ -2416,9 +2434,11 @@ class CropprCore {
     const defaultValue = (v, d) => (v !== null ? v : d);
     return {
       aspectRatio: defaultValue(aspectRatio, defaults.aspectRatio),
+      autoPlayVideo: defaultValue(opts.autoPlayVideo, defaults.autoPlayVideo),
       maxAspectRatio: defaultValue(maxAspectRatio, defaults.maxAspectRatio),
       maxSize: defaultValue(maxSize, defaults.maxSize),
       minSize: defaultValue(minSize, defaults.minSize),
+      muteVideo: defaultValue(opts.muteVideo, defaults.muteVideo),
       startSize: defaultValue(startSize, defaults.startSize),
       startPosition: defaultValue(startPosition, defaults.startPosition),
       returnMode: defaultValue(returnMode, defaults.returnMode),
@@ -2426,8 +2446,9 @@ class CropprCore {
       onCropStart: defaultValue(onCropStart, defaults.onCropStart),
       onCropMove: defaultValue(onCropMove, defaults.onCropMove),
       onCropEnd: defaultValue(onCropEnd, defaults.onCropEnd),
+      onNotSupportedVideoLoad: defaultValue(onNotSupportedVideoLoad, defaults.onNotSupportedVideoLoad),
       preview: defaultValue(preview, defaults.preview),
-      responsive: defaultValue(responsive, defaults.responsive),
+      responsive: defaultValue(opts.responsive, defaults.responsive),
       modal: defaultValue(modal, defaults.modal)
     }
   }
@@ -3224,17 +3245,8 @@ class SmartCroppr extends Croppr {
         }
       };
       this.options.onInitialize = init;
-      const mediaType = element.nodeName.toLowerCase() === 'video' ? 'video' : 'image';
-      if (mediaType === 'image' && (element.width === 0 || element.height === 0)) {
-        element.onload = () => this.initialize(element);
-      } else if (mediaType === 'video' && (element.videoWidth === 0 || element.videoHeight === 0)) {
-        element.onloadeddata = () => {
-          this.initialize(element);
-        };
-      } else {
-        this.initialize(element);
-      }
 
+      this.initialize(element);
   }
 
   parseSmartOptions(options) {
@@ -3468,6 +3480,11 @@ var SmartCroppr$1 = /*#__PURE__*/function (_React$Component) {
     return _this;
   }
   _createClass(SmartCroppr$1, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      this.handleLoad();
+    }
+  }, {
     key: "componentWillUnmount",
     value: function componentWillUnmount() {
       if (this.croppr) this.croppr.destroy();
@@ -3478,8 +3495,9 @@ var SmartCroppr$1 = /*#__PURE__*/function (_React$Component) {
       var _this2 = this;
       var crop = this.props.crop ? JSON.parse(JSON.stringify(this.props.crop)) : null; // JSON.parse(JSON.stringify()) to avoid method to modify ours props!
       if (prevProps.src !== this.props.src) {
-        if (this.props.smartCrop) this.croppr.setMedia(this.props.src, null, true, this.props.smartCropOptions, this.props.mediaType);else this.croppr.setMedia(this.props.src, function () {
-          return _this2.croppr.setValue(crop || {
+        if (this.props.smartCrop) this.croppr.setMedia(this.props.src, this.props.onMediaLoad, true, this.props.smartCropOptions, this.props.mediaType);else this.croppr.setMedia(this.props.src, function (instance, mediaNode) {
+          if (_this2.props.onMediaLoad) _this2.props.onMediaLoad(instance, mediaNode);
+          _this2.croppr.setValue(crop || {
             x: 0,
             y: 0,
             width: 1,
@@ -3506,53 +3524,53 @@ var SmartCroppr$1 = /*#__PURE__*/function (_React$Component) {
   }, {
     key: "handleLoad",
     value: function handleLoad() {
-      if (typeof this.firstLoadDone === 'undefined') {
-        this.firstLoadDone = true;
-        var _this$props = this.props,
-          smartCrop = _this$props.smartCrop,
-          crop = _this$props.crop,
-          mode = _this$props.mode,
-          smartCropOptions = _this$props.smartCropOptions,
-          onCropEnd = _this$props.onCropEnd,
-          onCropStart = _this$props.onCropStart,
-          onCropMove = _this$props.onCropMove,
-          onInit = _this$props.onInit,
-          debug = _this$props.debug;
-        var _this$props2 = this.props,
-          aspectRatio = _this$props2.aspectRatio,
-          maxAspectRatio = _this$props2.maxAspectRatio;
-        if (!aspectRatio && !maxAspectRatio) {
-          aspectRatio = -Infinity;
-          maxAspectRatio = Infinity;
-        }
-        var startPosition = [0, 0, 'real'];
-        var startSize = [1, 1, 'ratio'];
-        if (crop) {
-          var x = crop.x,
-            y = crop.y,
-            width = crop.width,
-            height = crop.height;
-          startPosition = [x, y, crop.mode || mode];
-          startSize = [width, height, crop.mode || mode];
-        }
-        this.croppr = new SmartCroppr(this.media, {
-          returnMode: mode,
-          responsive: true,
-          aspectRatio: aspectRatio,
-          maxAspectRatio: maxAspectRatio,
-          debug: debug,
-          smartcrop: crop ? false : smartCrop,
-          smartOptions: smartCropOptions,
-          startPosition: startPosition,
-          startSize: startSize,
-          onCropEnd: onCropEnd,
-          onCropStart: onCropStart,
-          onCropMove: onCropMove,
-          onInitialize: onInit
-        });
+      var _this$props = this.props,
+        smartCrop = _this$props.smartCrop,
+        crop = _this$props.crop,
+        mode = _this$props.mode,
+        smartCropOptions = _this$props.smartCropOptions,
+        onCropEnd = _this$props.onCropEnd,
+        onCropStart = _this$props.onCropStart,
+        onCropMove = _this$props.onCropMove,
+        onInit = _this$props.onInit,
+        onMediaLoad = _this$props.onMediaLoad,
+        onNotSupportedVideoLoad = _this$props.onNotSupportedVideoLoad,
+        debug = _this$props.debug;
+      var _this$props2 = this.props,
+        aspectRatio = _this$props2.aspectRatio,
+        maxAspectRatio = _this$props2.maxAspectRatio;
+      if (!aspectRatio && !maxAspectRatio) {
+        aspectRatio = -Infinity;
+        maxAspectRatio = Infinity;
       }
-      if (this.props.mediaType === 'image') this.props.onImageLoad();else this.props.onVideoLoad();
-      this.props.onMediaLoad();
+      var startPosition = [0, 0, 'real'];
+      var startSize = [1, 1, 'ratio'];
+      if (crop) {
+        var x = crop.x,
+          y = crop.y,
+          width = crop.width,
+          height = crop.height;
+        startPosition = [x, y, crop.mode || mode];
+        startSize = [width, height, crop.mode || mode];
+      }
+      this.croppr = new SmartCroppr(this.media, {
+        returnMode: mode,
+        responsive: true,
+        aspectRatio: aspectRatio,
+        maxAspectRatio: maxAspectRatio,
+        debug: debug,
+        smartcrop: crop ? false : smartCrop,
+        smartOptions: smartCropOptions,
+        startPosition: startPosition,
+        startSize: startSize,
+        onCropEnd: onCropEnd,
+        onCropStart: onCropStart,
+        onCropMove: onCropMove,
+        onInitialize: function onInitialize(instance, mediaNode) {
+          if (onMediaLoad) onMediaLoad(instance, mediaNode);
+        },
+        onNotSupportedVideoLoad: onNotSupportedVideoLoad
+      });
     }
   }, {
     key: "render",
@@ -3570,16 +3588,13 @@ var SmartCroppr$1 = /*#__PURE__*/function (_React$Component) {
           return _this3.media = obj;
         },
         crossOrigin: "anonymous",
-        onLoad: this.handleLoad,
         src: srcOnInit
       }) : /*#__PURE__*/React.createElement("video", {
         ref: function ref(obj) {
           return _this3.media = obj;
         },
         crossOrigin: "anonymous",
-        onLoadedData: this.handleLoad,
         src: srcOnInit,
-        muted: true,
         loop: true
       }));
     }
@@ -3599,10 +3614,8 @@ SmartCroppr$1.propTypes = {
   onCropEnd: PropTypes.func,
   onCropMove: PropTypes.func,
   onCropStart: PropTypes.func,
-  onImageLoad: PropTypes.func,
   onInit: PropTypes.func,
   onMediaLoad: PropTypes.func,
-  onVideoLoad: PropTypes.func,
   smartCrop: PropTypes.bool,
   smartCropOptions: PropTypes.object,
   style: PropTypes.object
