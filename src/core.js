@@ -10,6 +10,10 @@ export default class SmartCroppr extends React.Component {
     constructor(props) {
         super(props);
         this.handleLoad = this.handleLoad.bind(this);
+        this.state = {
+            mediaTypeOnInit: props.mediaType,
+            srcOnInit: props.src,
+        }
     }
 
     componentWillUnmount() {
@@ -19,20 +23,23 @@ export default class SmartCroppr extends React.Component {
     componentDidUpdate(prevProps) {
         const crop = this.props.crop ? JSON.parse(JSON.stringify(this.props.crop)) : null; // JSON.parse(JSON.stringify()) to avoid method to modify ours props!
         if (prevProps.src !== this.props.src) {
-            if (this.props.smartCrop) this.croppr.setImage(
+            if (this.props.smartCrop) this.croppr.setMedia(
                 this.props.src,
                 null,
                 true,
-                this.props.smartCropOptions
+                this.props.smartCropOptions,
+                this.props.mediaType,
             );
-            else this.croppr.setImage(
+            else this.croppr.setMedia(
                 this.props.src,
                 () => this.croppr.setValue(
                     crop || {x: 0, y: 0, width: 1, height: 1},
                     true,
                     crop ? this.props.mode : 'ratio'
                 ),
-                false
+                false,
+                {},
+                this.props.mediaType,
             );
         } else if (!_.isEqual(prevProps.crop, this.props.crop) || prevProps.mode !== this.props.mode) {
             let updateIsNeeded = true;
@@ -51,7 +58,7 @@ export default class SmartCroppr extends React.Component {
         if (!_.isEqual(prevProps.style, this.props.style)) this.croppr.forceRedraw();
     }
 
-    handleLoad(ev) {
+    handleLoad() {
         if (typeof this.firstLoadDone === 'undefined') {
             this.firstLoadDone = true;
 
@@ -64,6 +71,7 @@ export default class SmartCroppr extends React.Component {
                 onCropStart,
                 onCropMove,
                 onInit,
+                debug,
             } = this.props;
 
             let { aspectRatio, maxAspectRatio } = this.props;
@@ -80,11 +88,12 @@ export default class SmartCroppr extends React.Component {
                 startSize = [width, height, crop.mode || mode];
             }
 
-            this.croppr = new BaseSmartCroppr(this.img, {
+            this.croppr = new BaseSmartCroppr(this.media, {
                 returnMode: mode,
                 responsive: true,
                 aspectRatio,
                 maxAspectRatio,
+                debug,
                 smartcrop: crop ? false : smartCrop,
                 smartOptions: smartCropOptions,
                 startPosition,
@@ -96,19 +105,36 @@ export default class SmartCroppr extends React.Component {
             });
         }
 
-        this.props.onImageLoad();
+        if (this.props.mediaType === 'image') this.props.onImageLoad();
+        else this.props.onVideoLoad();
+
+        this.props.onMediaLoad();
     }
 
     render() {
+        const { mediaTypeOnInit, srcOnInit } = this.state;
         return (
             <div className="cropper" style={this.props.style || null}>
-                <img
-                    alt=""
-                    ref={obj => this.img = obj}
-                    crossOrigin="anonymous"
-                    onLoad={this.handleLoad}
-                    src={this.props.src}
-                />
+                {
+                    mediaTypeOnInit === 'image' ? (
+                        <img
+                            alt=""
+                            ref={obj => this.media = obj}
+                            crossOrigin="anonymous"
+                            onLoad={this.handleLoad}
+                            src={srcOnInit}
+                        />
+                    ) : (
+                        <video 
+                            ref={obj => this.media = obj}
+                            crossOrigin="anonymous"
+                            onLoadedData={this.handleLoad}
+                            src={srcOnInit}
+                            muted
+                            loop
+                        />
+                    )
+                }
             </div>
         );
     }
@@ -120,13 +146,17 @@ SmartCroppr.propTypes = {
     // optional
     aspectRatio: PropTypes.number,
     crop: PropTypes.object,
+    debug: PropTypes.bool,
     maxAspectRatio: PropTypes.number,
+    mediaType: PropTypes.oneOf(['image', 'video']),
     mode: PropTypes.oneOf(['ratio', 'raw', 'real']),
     onCropEnd: PropTypes.func,
     onCropMove: PropTypes.func,
     onCropStart: PropTypes.func,
     onImageLoad: PropTypes.func,
     onInit: PropTypes.func,
+    onMediaLoad: PropTypes.func,
+    onVideoLoad: PropTypes.func,
     smartCrop: PropTypes.bool,
     smartCropOptions: PropTypes.object,
     style: PropTypes.object,
@@ -136,12 +166,16 @@ SmartCroppr.defaultProps = {
     aspectRatio: null,
     maxAspectRatio: null,
     crop: null,
+    debug: false,
+    mediaType: 'image',
     mode: 'real',
     onCropEnd: data => null,
     onCropMove: data => null,
     onCropStart: data => null,
     onImageLoad: () => null,
-    onInit: instance => null,
+    onInit: (instance, mediaNode) => null,
+    onMediaLoad: () => null,
+    onVideoLoad: () => null,
     smartCrop: true,
     smartCropOptions: null,
 };
