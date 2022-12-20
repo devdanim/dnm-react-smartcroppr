@@ -108,7 +108,7 @@ export default class SmartCroppr extends React.Component {
             onCropStart,
             onCropMove,
             onInitialize: (instance, mediaNode) => {
-                if (onInit) (instance, mediaNode);
+                if (onInit) onInit(instance, mediaNode);
                 if (onMediaLoad) onMediaLoad(instance, mediaNode);
             },
             onNotSupportedVideoLoad,

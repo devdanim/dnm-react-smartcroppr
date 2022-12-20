@@ -3567,6 +3567,7 @@ var SmartCroppr$1 = /*#__PURE__*/function (_React$Component) {
         onCropStart: onCropStart,
         onCropMove: onCropMove,
         onInitialize: function onInitialize(instance, mediaNode) {
+          if (onInit) onInit(instance, mediaNode);
           if (onMediaLoad) onMediaLoad(instance, mediaNode);
         },
         onNotSupportedVideoLoad: onNotSupportedVideoLoad
