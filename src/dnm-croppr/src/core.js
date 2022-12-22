@@ -35,7 +35,7 @@ const HANDLES = [
 export default class CropprCore {
   constructor(element, options, deferred = false) {    
     this.debug = options.debug || false;
-
+    console.log('DEBUG');
     this.onRegionMoveStart = this._onRegionMoveStart.bind(this);
     this.onRegionMoveMoving = this._onRegionMoveMoving.bind(this);
     this.onRegionMoveEnd = this._onRegionMoveEnd.bind(this);
@@ -216,7 +216,7 @@ export default class CropprCore {
 
     // Add onload listener to reinitialize box
     this.lastMediaReload = new Date().getTime();
-    this.mediaEl[this.mediaType === 'image' ? 'onload' : 'onloadeddata'] = () => {
+    const handleMediaLoad = () => {
       if (this.lastMediaReload >= this.lastDestroyedDate) {
         this.showModal("setImage")
         this.initializeBox(null, false);
@@ -237,9 +237,10 @@ export default class CropprCore {
           }
           if (this.onMediaLoad) this.onMediaLoad(this, this.mediaEl);
         } else this.syncVideos();
+        if (onInit) onInit();
       }
-      if (onInit) onInit();
     }
+    this.mediaEl[this.mediaType === 'image' ? 'onload' : 'onloadeddata'] = handleMediaLoad;
     this.mediaEl.setAttribute('src', targetEl.getAttribute('src'));
 
     this.mediaEl.className = 'croppr-image';
@@ -357,6 +358,7 @@ export default class CropprCore {
       return videos.filter(video => video.readyState === 4).length === videos.length;
     }
     const attachHandlerEvents = () => {
+      if (this.debug) console.log('All videos are ready');
       if (this.lastMediaReload >= this.lastDestroyedDate) {
         this.attachVideosToSyncHandlers();
         this.videosToSync.forEach(videoToSync => videoToSync.muted = true);
@@ -368,8 +370,10 @@ export default class CropprCore {
     if (checkIfAllVideosAreReady()) attachHandlerEvents();
     else {
       let handlersHaveBeenAttached = false;
-      videos.forEach((video, v) => {
+      videos.forEach((video, vIndex) => {
+        if (this.debug) console.log('Waiting for video', vIndex);
         video.addEventListener('canplaythrough', () => {
+          if (this.debug) console.log('Video ready', vIndex);
           if (!handlersHaveBeenAttached && checkIfAllVideosAreReady()) {
             handlersHaveBeenAttached = true;
             attachHandlerEvents();

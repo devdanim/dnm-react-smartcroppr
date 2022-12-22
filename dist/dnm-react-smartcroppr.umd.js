@@ -1361,6 +1361,7 @@
       var deferred = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
       _classCallCheck(this, CropprCore);
       this.debug = options.debug || false;
+      console.log('DEBUG');
       this.onRegionMoveStart = this._onRegionMoveStart.bind(this);
       this.onRegionMoveMoving = this._onRegionMoveMoving.bind(this);
       this.onRegionMoveEnd = this._onRegionMoveEnd.bind(this);
@@ -1624,7 +1625,7 @@
     }, {
       key: "_onVideoAutoPlay",
       value: function _onVideoAutoPlay() {
-        if (this.debug) console.log("Try to autoplay", this.debug);
+        if (this.debug) console.log('Try to autoplay', this.debug);
         if (this.videoRef && this.videoRef.paused) this.videoRef.play();
         if (this.videoRef && !this.videoRef.paused) clearInterval(this.autoPlayInterval);
       }
@@ -5815,9 +5816,7 @@
     }, {
       key: "componentWillUnmount",
       value: function componentWillUnmount() {
-        var debug = this.props.debug;
-        if (debug) console.log('Unmount component', debug);
-        if (this.croppr) this.croppr.destroy(true);else console.error("No croppr");
+        if (this.croppr) this.croppr.destroy(true);
       }
     }, {
       key: "componentDidUpdate",
