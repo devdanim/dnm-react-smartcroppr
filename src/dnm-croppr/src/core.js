@@ -35,7 +35,6 @@ const HANDLES = [
 export default class CropprCore {
   constructor(element, options, deferred = false) {    
     this.debug = options.debug || false;
-    console.log('DEBUG');
     this.onRegionMoveStart = this._onRegionMoveStart.bind(this);
     this.onRegionMoveMoving = this._onRegionMoveMoving.bind(this);
     this.onRegionMoveEnd = this._onRegionMoveEnd.bind(this);

@@ -1356,7 +1356,6 @@ var CropprCore = /*#__PURE__*/function () {
     var deferred = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
     _classCallCheck(this, CropprCore);
     this.debug = options.debug || false;
-    console.log('DEBUG');
     this.onRegionMoveStart = this._onRegionMoveStart.bind(this);
     this.onRegionMoveMoving = this._onRegionMoveMoving.bind(this);
     this.onRegionMoveEnd = this._onRegionMoveEnd.bind(this);
@@ -1540,7 +1539,7 @@ var CropprCore = /*#__PURE__*/function () {
 
       // Add onload listener to reinitialize box
       this.lastMediaReload = new Date().getTime();
-      this.mediaEl[this.mediaType === 'image' ? 'onload' : 'onloadeddata'] = function () {
+      var handleMediaLoad = function handleMediaLoad() {
         if (_this2.lastMediaReload >= _this2.lastDestroyedDate) {
           _this2.showModal("setImage");
           _this2.initializeBox(null, false);
@@ -1560,9 +1559,10 @@ var CropprCore = /*#__PURE__*/function () {
             }
             if (_this2.onMediaLoad) _this2.onMediaLoad(_this2, _this2.mediaEl);
           } else _this2.syncVideos();
+          if (onInit) onInit();
         }
-        if (onInit) onInit();
       };
+      this.mediaEl[this.mediaType === 'image' ? 'onload' : 'onloadeddata'] = handleMediaLoad;
       this.mediaEl.setAttribute('src', targetEl.getAttribute('src'));
       this.mediaEl.className = 'croppr-image';
 
@@ -1688,6 +1688,7 @@ var CropprCore = /*#__PURE__*/function () {
         }).length === videos.length;
       };
       var attachHandlerEvents = function attachHandlerEvents() {
+        if (_this5.debug) console.log('All videos are ready');
         if (_this5.lastMediaReload >= _this5.lastDestroyedDate) {
           _this5.attachVideosToSyncHandlers();
           _this5.videosToSync.forEach(function (videoToSync) {
@@ -1699,8 +1700,10 @@ var CropprCore = /*#__PURE__*/function () {
       };
       if (checkIfAllVideosAreReady()) attachHandlerEvents();else {
         var handlersHaveBeenAttached = false;
-        videos.forEach(function (video, v) {
+        videos.forEach(function (video, vIndex) {
+          if (_this5.debug) console.log('Waiting for video', vIndex);
           video.addEventListener('canplaythrough', function () {
+            if (_this5.debug) console.log('Video ready', vIndex);
             if (!handlersHaveBeenAttached && checkIfAllVideosAreReady()) {
               handlersHaveBeenAttached = true;
               attachHandlerEvents();
