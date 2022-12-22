@@ -38,7 +38,7 @@ class Example extends React.Component {
   render() {
     const { src, type, reinitCounter } = this.state;
       return (
-        <div key={reinitCounter}>
+        <div>
           <div>
             {
               medias.map((media, index) => (
@@ -48,19 +48,20 @@ class Example extends React.Component {
           </div>
           <div style={{position: 'relative', maxWidth: '500px', width: '100%', margin: 'auto'}}>
             <SmartCroppr
+              key={reinitCounter}
               aspectRatio={0.5}
-              debug
+              debug={new Date().getTime()}
               // crop={{x:40, y:60, width: 90, height: 90}}
               // maxAspectRatio={2}
               mode='real'
+              autoPlayVideo
+              muteVideo
               onCropEnd={data => console.log('onCropEnd', data)}
               onCropMove={data => console.log('onCropMove', data)}
               onCropStart={data => console.log('onCropStart', data)}
-              onInit={(instance, mediaNode) => {
-                console.log('onInit', instance, mediaNode);
-              }}
+              onInit={(instance, mediaNode) => window.mediaNode = mediaNode}
               onNotSupportedVideoLoad={error => console.log('onNotSupportedVideoLoad', error)}
-              smartCrop={true}
+              smartCrop={false}
               smartCropOptions={{
                 minWidth: 100,
                 minHeight: 200,
@@ -68,6 +69,8 @@ class Example extends React.Component {
                   console.log("Smartcrop", data)
                 }
               }}
+              resyncMethod="interval"
+              resyncInterval={500}
               mediaType={type}
               src={src}
             />

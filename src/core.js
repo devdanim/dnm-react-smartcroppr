@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import BaseSmartCroppr from 'dnm-smartcroppr';
+import BaseSmartCroppr from './dnm-smartcroppr/src/index';
 // lodash
 import isEqual from 'lodash-es/isEqual';
 
@@ -21,7 +21,7 @@ export default class SmartCroppr extends React.Component {
     }
 
     componentWillUnmount() {
-        if (this.croppr) this.croppr.destroy();
+        if (this.croppr) this.croppr.destroy(true);
     }
 
     componentDidUpdate(prevProps) {
@@ -77,7 +77,11 @@ export default class SmartCroppr extends React.Component {
             onInit,
             onMediaLoad,
             onNotSupportedVideoLoad,
+            autoPlayVideo,
+            muteVideo,
             debug,
+            resyncInterval,
+            resyncMethod,
         } = this.props;
 
         let { aspectRatio, maxAspectRatio } = this.props;
@@ -107,6 +111,10 @@ export default class SmartCroppr extends React.Component {
             onCropEnd,
             onCropStart,
             onCropMove,
+            autoPlayVideo,
+            muteVideo,
+            resyncInterval,
+            resyncMethod,
             onInitialize: (instance, mediaNode) => {
                 if (onInit) onInit(instance, mediaNode);
                 if (onMediaLoad) onMediaLoad(instance, mediaNode);
@@ -146,16 +154,19 @@ SmartCroppr.propTypes = {
     src: PropTypes.string.isRequired,
     // optional
     aspectRatio: PropTypes.number,
+    autoPlayVideo: PropTypes.bool,
     crop: PropTypes.object,
-    debug: PropTypes.bool,
     maxAspectRatio: PropTypes.number,
     mediaType: PropTypes.oneOf(['image', 'video']),
     mode: PropTypes.oneOf(['ratio', 'raw', 'real']),
+    muteVideo: PropTypes.bool,
     onCropEnd: PropTypes.func,
     onCropMove: PropTypes.func,
     onCropStart: PropTypes.func,
     onInit: PropTypes.func,
     onMediaLoad: PropTypes.func,
+    resyncInterval: PropTypes.number,
+    resyncMethod:  PropTypes.oneOf(['none', 'interval', 'requestAnimationFrame']),
     smartCrop: PropTypes.bool,
     smartCropOptions: PropTypes.object,
     style: PropTypes.object,
@@ -163,11 +174,12 @@ SmartCroppr.propTypes = {
 
 SmartCroppr.defaultProps = {
     aspectRatio: null,
-    maxAspectRatio: null,
+    autoPlayVideo: false,
     crop: null,
-    debug: false,
+    maxAspectRatio: null,
     mediaType: 'image',
     mode: 'real',
+    muteVideo: false,
     onCropEnd: data => null,
     onCropMove: data => null,
     onCropStart: data => null,
@@ -175,6 +187,8 @@ SmartCroppr.defaultProps = {
     onInit: (instance, mediaNode) => null,
     onMediaLoad: () => null,
     onVideoLoad: () => null,
+    resyncInterval: 1000,
+    resyncMethod: 'requestAnimationFrame',
     smartCrop: true,
     smartCropOptions: null,
 };
