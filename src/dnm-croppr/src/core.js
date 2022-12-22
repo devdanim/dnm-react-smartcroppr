@@ -369,15 +369,21 @@ export default class CropprCore {
     if (checkIfAllVideosAreReady()) attachHandlerEvents();
     else {
       let handlersHaveBeenAttached = false;
+      let readyCounter = 0;
       videos.forEach((video, vIndex) => {
-        if (this.debug) console.log('Waiting for video', vIndex);
-        video.addEventListener('canplaythrough', () => {
-          if (this.debug) console.log('Video ready', vIndex);
-          if (!handlersHaveBeenAttached && checkIfAllVideosAreReady()) {
-            handlersHaveBeenAttached = true;
-            attachHandlerEvents();
-          }
-        }, { once: true });
+        if (video.readyState === 4) readyCounter++;
+        else {
+          if (this.debug) console.log('Waiting for video', vIndex);
+          // We don't use canplay because we found some cases where canplay wasn't triggered even if readyState was equal to 3 before event listening
+          video.addEventListener('canplaythrough', () => {
+            readyCounter++;
+            if (this.debug) console.log('Video ready', vIndex);
+            if (!handlersHaveBeenAttached && readyCounter === videos.length) {
+              handlersHaveBeenAttached = true;
+              attachHandlerEvents();
+            }
+          }, { once: true });
+        }
       });
     }
   }

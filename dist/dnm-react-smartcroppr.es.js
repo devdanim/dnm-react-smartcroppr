@@ -1700,17 +1700,22 @@ var CropprCore = /*#__PURE__*/function () {
       };
       if (checkIfAllVideosAreReady()) attachHandlerEvents();else {
         var handlersHaveBeenAttached = false;
+        var readyCounter = 0;
         videos.forEach(function (video, vIndex) {
-          if (_this5.debug) console.log('Waiting for video', vIndex);
-          video.addEventListener('canplaythrough', function () {
-            if (_this5.debug) console.log('Video ready', vIndex);
-            if (!handlersHaveBeenAttached && checkIfAllVideosAreReady()) {
-              handlersHaveBeenAttached = true;
-              attachHandlerEvents();
-            }
-          }, {
-            once: true
-          });
+          if (video.readyState === 4) readyCounter++;else {
+            if (_this5.debug) console.log('Waiting for video', vIndex);
+            // We don't use canplay because we found some cases where canplay wasn't triggered even if readyState was equal to 3 before event listening
+            video.addEventListener('canplaythrough', function () {
+              readyCounter++;
+              if (_this5.debug) console.log('Video ready', vIndex);
+              if (!handlersHaveBeenAttached && readyCounter === videos.length) {
+                handlersHaveBeenAttached = true;
+                attachHandlerEvents();
+              }
+            }, {
+              once: true
+            });
+          }
         });
       }
     }
