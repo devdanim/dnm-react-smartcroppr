@@ -3919,7 +3919,8 @@ var SmartCroppr$1 = /*#__PURE__*/function (_React$Component) {
         },
         crossOrigin: "anonymous",
         src: srcOnInit,
-        loop: true
+        autoPlay: this.props.autoPlayVideo,
+        loop: this.props.loop
       }));
     }
   }]);
@@ -3931,6 +3932,7 @@ SmartCroppr$1.propTypes = {
   // optional
   aspectRatio: PropTypes.number,
   autoPlayVideo: PropTypes.bool,
+  loop: PropTypes.bool,
   crop: PropTypes.object,
   maxAspectRatio: PropTypes.number,
   mediaType: PropTypes.oneOf(['image', 'video']),
@@ -3950,6 +3952,7 @@ SmartCroppr$1.propTypes = {
 SmartCroppr$1.defaultProps = {
   aspectRatio: null,
   autoPlayVideo: false,
+  loop: true,
   crop: null,
   maxAspectRatio: null,
   mediaType: 'image',
