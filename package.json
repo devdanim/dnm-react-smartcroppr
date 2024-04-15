@@ -1,6 +1,6 @@
 {
   "name": "dnm-react-smartcroppr",
-  "version": "1.6.5",
+  "version": "1.6.6",
   "description": "React cropper based on dnm-smartcroppr",
   "main": "dist/dnm-react-smartcroppr.umd.min.js",
   "module": "dist/dnm-react-smartcroppr.es.min.js",
