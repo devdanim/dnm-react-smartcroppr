@@ -284,7 +284,7 @@ function styleInject(css, ref) {
   }
 }
 
-var css_248z = ".croppr-container * {\n  user-select: none;\n  -moz-user-select: none;\n  -webkit-user-select: none;\n  -ms-user-select: none;\n  box-sizing: border-box;\n  -webkit-box-sizing: border-box;\n  -moz-box-sizing: border-box;\n}\n\n.croppr-container img {\n  vertical-align: middle;\n  max-width: 100%;\n}\n\n.croppr {\n  position: relative;\n  display: inline-block;\n}\n\n.croppr-overlay {\n  background: rgba(0,0,0,0.5);\n  position: absolute;\n  top: 0;\n  right: 0;\n  bottom: 0;\n  left: 0;\n  z-index: 1;\n  cursor: crosshair;\n}\n\n.croppr-region {\n  position: absolute;\n  z-index: 3;\n  cursor: move;\n  top: 0;\n}\n\n.croppr-imageClipped {\n  position: absolute;\n  top: 0;\n  right: 0;\n  bottom: 0;\n  left: 0;\n  z-index: 2;\n  pointer-events: none;\n  background-color: white;\n}\n\n.croppr-handle {\n  border: 1px solid black;\n  border-radius: 5px;\n  background-color: white;\n  width: 10px;\n  height: 10px;\n  position: absolute;\n  z-index: 4;\n  top: 0;\n}\n\n.croppr-dark .croppr-image {\n  background-color: white;\n}\n\n.croppr-light .croppr-image, .croppr-light .croppr-imageClipped {\n  background-color: black;\n}\n\n";
+var css_248z = ".croppr-container * {\n  user-select: none;\n  -moz-user-select: none;\n  -webkit-user-select: none;\n  -ms-user-select: none;\n  box-sizing: border-box;\n  -webkit-box-sizing: border-box;\n  -moz-box-sizing: border-box;\n}\n\n.croppr-container img {\n  vertical-align: middle;\n  max-width: 100%;\n}\n\n.croppr {\n  position: relative;\n  display: inline-block;\n}\n\n.croppr-overlay {\n  background: rgba(0,0,0,0.5);\n  position: absolute;\n  top: 0;\n  right: 0;\n  bottom: 0;\n  left: 0;\n  z-index: 1;\n  cursor: crosshair;\n}\n\n.croppr-region {\n  position: absolute;\n  z-index: 3;\n  cursor: move;\n  top: 0;\n}\n\n.croppr-imageClipped {\n  position: absolute;\n  top: 0;\n  right: 0;\n  bottom: 0;\n  left: 0;\n  z-index: 2;\n  pointer-events: none;\n  background-color: white;\n  opacity: 0.5 !important;\n}\n\n.croppr-handle {\n  border: 1px solid black;\n  border-radius: 5px;\n  background-color: white;\n  width: 10px;\n  height: 10px;\n  position: absolute;\n  z-index: 4;\n  top: 0;\n}\n\n.croppr-dark .croppr-image {\n  background-color: white;\n}\n\n.croppr-light .croppr-image, .croppr-light .croppr-imageClipped {\n  background-color: black;\n}\n\n";
 styleInject(css_248z);
 
 /**
@@ -1520,6 +1520,8 @@ var CropprCore = /*#__PURE__*/function () {
         return _this2.mediaEl.setAttribute(attr, true);
       });else this.mediaEl.setAttribute('alt', targetEl.getAttribute('alt'));
       this.mediaEl.setAttribute('crossOrigin', 'anonymous');
+      this.mediaEl.setAttribute('preload', 'metadata');
+      this.mediaEl.setAttribute('playsinline', '');
 
       // Detect if video is not supported by web browser
       if (this.mediaType === 'video') {
@@ -1562,7 +1564,7 @@ var CropprCore = /*#__PURE__*/function () {
           if (onInit) onInit();
         }
       };
-      this.mediaEl[this.mediaType === 'image' ? 'onload' : 'onloadeddata'] = handleMediaLoad;
+      this.mediaEl[this.mediaType === 'image' ? 'onload' : 'onloadedmetadata'] = handleMediaLoad;
       this.mediaEl.setAttribute('src', targetEl.getAttribute('src'));
       this.mediaEl.className = 'croppr-image';
 
@@ -3677,14 +3679,18 @@ var SmartCroppr = /*#__PURE__*/function (_Croppr) {
         };
         var media = document.createElement(this.mediaType === 'video' ? 'video' : 'img');
         media.setAttribute('crossOrigin', 'anonymous');
-        media[this.mediaType === 'video' ? 'onloadeddata' : 'onload'] = function () {
+        media.setAttribute('preload', 'metadata');
+        media[this.mediaType === 'video' ? 'onloadedmetadata' : 'onload'] = function () {
           if (_this2.mediaType === 'video') {
             captureImageFromVideo(media, function (img) {
               return scaleImageCallback(img, 1);
             });
           } else scaleImageCallback(media, 1);
         };
-        if (this.mediaType === 'video') media.setAttribute('muted', true);
+        if (this.mediaType === 'video') {
+          media.setAttribute('muted', true);
+          media.setAttribute('playsinline', '');
+        }
         media.setAttribute('src', this.mediaEl.src);
       }
     }
@@ -3919,7 +3925,8 @@ var SmartCroppr$1 = /*#__PURE__*/function (_React$Component) {
         },
         crossOrigin: "anonymous",
         src: srcOnInit,
-        loop: true
+        autoPlay: this.props.autoPlayVideo,
+        loop: this.props.loop
       }));
     }
   }]);
@@ -3931,6 +3938,7 @@ SmartCroppr$1.propTypes = {
   // optional
   aspectRatio: PropTypes.number,
   autoPlayVideo: PropTypes.bool,
+  loop: PropTypes.bool,
   crop: PropTypes.object,
   maxAspectRatio: PropTypes.number,
   mediaType: PropTypes.oneOf(['image', 'video']),
@@ -3950,6 +3958,7 @@ SmartCroppr$1.propTypes = {
 SmartCroppr$1.defaultProps = {
   aspectRatio: null,
   autoPlayVideo: false,
+  loop: true,
   crop: null,
   maxAspectRatio: null,
   mediaType: 'image',

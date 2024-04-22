@@ -45,6 +45,7 @@
   z-index: 2;
   pointer-events: none;
   background-color: white;
+  opacity: 0.5 !important;
 }
 
 .croppr-handle {

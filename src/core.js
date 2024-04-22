@@ -125,6 +125,7 @@ export default class SmartCroppr extends React.Component {
 
     render() {
         const { mediaTypeOnInit, srcOnInit } = this.state;
+
         return (
             <div className="cropper" style={this.props.style || null}>
                 {
@@ -140,7 +141,8 @@ export default class SmartCroppr extends React.Component {
                             ref={obj => this.media = obj}
                             crossOrigin="anonymous"
                             src={srcOnInit}
-                            loop
+                            autoPlay={this.props.autoPlayVideo}
+                            loop={this.props.loop}
                         />
                     )
                 }
@@ -155,6 +157,7 @@ SmartCroppr.propTypes = {
     // optional
     aspectRatio: PropTypes.number,
     autoPlayVideo: PropTypes.bool,
+    loop: PropTypes.bool,
     crop: PropTypes.object,
     maxAspectRatio: PropTypes.number,
     mediaType: PropTypes.oneOf(['image', 'video']),
@@ -175,6 +178,7 @@ SmartCroppr.propTypes = {
 SmartCroppr.defaultProps = {
     aspectRatio: null,
     autoPlayVideo: false,
+    loop: true,
     crop: null,
     maxAspectRatio: null,
     mediaType: 'image',

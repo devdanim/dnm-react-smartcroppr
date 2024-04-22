@@ -196,7 +196,9 @@ export default class CropprCore {
     if (this.mediaType === 'video') ['loop', ...(this.options.muteVideo ? ['muted'] : [])].forEach(attr => this.mediaEl.setAttribute(attr, true));
     else this.mediaEl.setAttribute('alt', targetEl.getAttribute('alt'));
     this.mediaEl.setAttribute('crossOrigin', 'anonymous');
-    
+    this.mediaEl.setAttribute('preload', 'metadata');
+    this.mediaEl.setAttribute('playsinline', '');
+
     // Detect if video is not supported by web browser
     if (this.mediaType === 'video') {
       this.mediaEl.onerror = (event) => {
@@ -239,7 +241,7 @@ export default class CropprCore {
         if (onInit) onInit();
       }
     }
-    this.mediaEl[this.mediaType === 'image' ? 'onload' : 'onloadeddata'] = handleMediaLoad;
+    this.mediaEl[this.mediaType === 'image' ? 'onload' : 'onloadedmetadata'] = handleMediaLoad;
     this.mediaEl.setAttribute('src', targetEl.getAttribute('src'));
 
     this.mediaEl.className = 'croppr-image';

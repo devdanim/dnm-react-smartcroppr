@@ -151,14 +151,18 @@ class SmartCroppr extends Croppr {
 
       const media = document.createElement(this.mediaType === 'video' ? 'video' : 'img');
       media.setAttribute('crossOrigin', 'anonymous');
-      media[this.mediaType === 'video' ? 'onloadeddata' : 'onload'] = () => {
+      media.setAttribute('preload', 'metadata');
+      media[this.mediaType === 'video' ? 'onloadedmetadata' : 'onload'] = () => {
         if (this.mediaType === 'video') {
           captureImageFromVideo(media, (img) => scaleImageCallback(img, 1));
         } else scaleImageCallback(media, 1);
       }
-      if (this.mediaType === 'video') media.setAttribute('muted', true);
+      if (this.mediaType === 'video') {
+        media.setAttribute('muted', true);
+        media.setAttribute('playsinline', '');
+      }
+
       media.setAttribute('src', this.mediaEl.src);
-  
     }
 
   }
